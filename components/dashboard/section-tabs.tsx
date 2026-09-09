@@ -3,14 +3,6 @@ import { usePathname } from "next/navigation";
 import { Tabs } from "@/components/dashboard/ui";
 
 export const sectionTabs = {
-  activity: [
-    { label: "All activity", href: "/activity" },
-    { label: "Document changes", href: "/activity/document-changes" },
-    { label: "Workflow runs", href: "/activity/workflow-runs" },
-    { label: "Evaluations", href: "/activity/evaluations" },
-    { label: "Support", href: "/activity/support" },
-    { label: "System", href: "/activity/system" },
-  ],
   reviews: [
     { label: "All reviews", href: "/reviews" },
     { label: "Pending", href: "/reviews/pending", count: 12 },

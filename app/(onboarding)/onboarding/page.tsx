@@ -11,7 +11,7 @@ export default function OnboardingEntryPage() {
     getOnboardingStatus()
       .then((status) => {
         if (status.state === "COMPLETED") {
-          router.replace("/dashboard");
+          router.replace("/overview");
         } else if (status.state === "NOT_STARTED") {
           router.replace("/onboarding/welcome");
         } else {

@@ -70,7 +70,7 @@ export function OnboardingComplete({ documentCount = 0, chunkCount = 0 }: Props)
             label="Status"
           />
         </div>
-        <a href="/dashboard" className="mt-2 inline-block">
+        <a href="/overview" className="mt-2 inline-block">
           <DesignButton
             primary
             className="min-w-[200px] justify-center px-[28px] py-[14px] text-[15px]">

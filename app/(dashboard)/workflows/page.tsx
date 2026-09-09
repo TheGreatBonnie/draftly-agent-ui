@@ -140,7 +140,7 @@ export default function Page() {
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-xs sm:w-[300px] sm:grid-cols-[1fr_1fr_auto]">
+                  <div className="grid grid-cols-2 gap-3 text-xs sm:flex-1 sm:min-w-0">
                     <div>
                       <div className="text-slate-400">Trigger</div>
                       <div className="mt-1">{workflow[2]}</div>
@@ -153,13 +153,6 @@ export default function Page() {
                         ● {workflow[4]}
                       </div>
                     </div>
-                    <button
-                      aria-label="Toggle workflow"
-                      className={`self-center h-6 w-11 rounded-full p-1 ${workflow[5] ? "bg-blue-600" : "bg-slate-200"}`}>
-                      <span
-                        className={`block h-4 w-4 rounded-full bg-white transition ${workflow[5] ? "ml-5" : ""}`}
-                      />
-                    </button>
                   </div>
                 </div>
               );

@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
   AlertTriangle,
   Bell,
   Bot,
@@ -28,9 +27,8 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/components/dashboard/theme-provider";
 
 const nav = [
-  ["Overview", "/", Grid2X2],
+  ["Overview", "/overview", Grid2X2],
   ["Knowledge", "/knowledge", BookOpen],
-  ["Activity", "/activity", Activity],
   ["Reviews", "/reviews", FileCheck2],
   ["Evaluations", "/evaluations", Boxes],
   ["Documentation", "/documentation", Files],
@@ -67,7 +65,7 @@ function Navigation({
   return (
     <nav aria-label="Primary navigation" className="space-y-1 px-3">
       {nav.map(([label, href, Icon]) => {
-        const active = href === "/" ? path === href : path.startsWith(href);
+        const active = path === href || path.startsWith(`${href}/`);
         return (
           <Link
             onClick={onNavigate}

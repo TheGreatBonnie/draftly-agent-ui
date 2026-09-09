@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  Activity,
   AlertTriangle,
   Bot,
   Boxes,
@@ -24,14 +23,11 @@ import {
   IconTile,
   PageHeader,
   Progress,
-  SearchBox,
-  SelectPill,
 } from "@/components/dashboard/ui";
 import { SectionTabs } from "@/components/dashboard/section-tabs";
-import { activityItems, agents, reviews, workflows } from "@/lib/mock-data";
+import { agents, reviews, workflows } from "@/lib/mock-data";
 
 type Section =
-  | "activity"
   | "reviews"
   | "evaluations"
   | "documentation"
@@ -72,69 +68,6 @@ const evalRuns = [
   ["run_01H6K9", "Redis caching guide", "documentation", 14, 14, 0, 96],
   ["run_01H5Q8", "Support response evaluation", "support", 16, 13, 3, 84],
 ];
-
-export function ActivitySubpage({ kind }: { kind: string }) {
-  const filters: Record<string, (x: any) => boolean> = {
-    "document-changes": (x) => x.icon === "file",
-    "workflow-runs": (x) => x.icon === "workflow",
-    evaluations: (x) => x.title.toLowerCase().includes("evaluation"),
-    support: (x) => x.icon === "message",
-    system: (x) => x.source === "System",
-  };
-  const rows = activityItems.filter(filters[kind] ?? (() => true));
-  const title =
-    {
-      "document-changes": "Document changes",
-      "workflow-runs": "Workflow runs",
-      evaluations: "Evaluation activity",
-      support: "Support activity",
-      system: "System activity",
-    }[kind] ?? "Activity";
-  return (
-    <>
-      <PageHeader
-        title={title}
-        subtitle="Focused activity stream using mock Draftly events."
-      />
-      <SectionTabs section="activity" />
-      <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_300px]">
-        <Card className="overflow-hidden">
-          <div className="divide-y divide-border">
-            {(rows.length ? rows : activityItems.slice(0, 4)).map((e: any) => (
-              <Link
-                href={`/activity/${e.id}`}
-                key={e.id}
-                className="flex gap-3 p-4 hover:bg-surface-subtle">
-                <IconTile size="sm">
-                  <Activity className="h-4 w-4" />
-                </IconTile>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold">{e.title}</div>
-                  <div className="mt-1 text-xs text-foreground-muted">
-                    {e.detail}
-                  </div>
-                  <div className="mt-2 flex gap-2">
-                    <Badge>{e.source}</Badge>
-                    <Badge tone="slate">{e.type}</Badge>
-                  </div>
-                </div>
-                <span className="text-xs text-foreground-muted">{e.time}</span>
-              </Link>
-            ))}
-          </div>
-        </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold">View controls</h3>
-          <div className="mt-4 space-y-3">
-            <SearchBox placeholder="Search activity..." />
-            <SelectPill className="w-full">All sources</SelectPill>
-            <SelectPill className="w-full">All actors</SelectPill>
-          </div>
-        </Card>
-      </div>
-    </>
-  );
-}
 
 export function ReviewsSubpage({ kind }: { kind: string }) {
   const map: Record<string, (r: any) => boolean> = {

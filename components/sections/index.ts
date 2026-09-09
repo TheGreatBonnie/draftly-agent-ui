@@ -1,5 +1,4 @@
 export {
-  ActivitySubpage,
   AgentsSubpage,
   DocumentationSubpage,
   EvaluationsSubpage,

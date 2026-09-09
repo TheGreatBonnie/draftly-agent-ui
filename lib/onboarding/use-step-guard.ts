@@ -16,7 +16,7 @@ export function useStepGuard(step: OnboardingStep): void {
         if (cancelled) return;
         if (status.state === "COMPLETED") {
           clearAllOnboardingDrafts();
-          if (step !== "complete") router.replace("/dashboard");
+          if (step !== "complete") router.replace("/overview");
           return;
         }
         const expected = STATE_TO_STEP[status.state] ?? "workspace";

@@ -91,7 +91,7 @@ export function Navbar() {
 
           <Show when="signed-in">
             <Link
-              href="/dashboard"
+              href="/overview"
               className="rounded-[7px] bg-primary px-5 py-3 text-xs font-bold text-primary-foreground shadow-[0_10px_28px_rgba(67,56,242,0.25)] transition hover:opacity-90">
               Dashboard
             </Link>
@@ -127,7 +127,7 @@ export function Navbar() {
 
             <Show when="signed-in">
               <Link
-                href="/dashboard"
+                href="/overview"
                 className="rounded-lg bg-foreground px-4 py-3 text-center text-sm font-medium text-background">
                 Dashboard
               </Link>
