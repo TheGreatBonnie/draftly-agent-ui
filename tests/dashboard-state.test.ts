@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { chartDataForRange, dateRanges, type ChartRange } from "./dashboard-state.ts";
+import { chartDataForRange, dateRanges, type ChartRange } from "../lib/dashboard-state.ts";
 
 test("returns the full mock activity series for the 14-day range", () => {
   const series = chartDataForRange("Last 14 days");

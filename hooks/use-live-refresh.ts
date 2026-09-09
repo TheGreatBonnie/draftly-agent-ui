@@ -6,6 +6,8 @@ import { useLiveVersion } from "@/components/live-events/live-events-provider";
 export interface LiveRefreshState<T> {
   data: T | null;
   error: string | null;
+  isLoading: boolean;
+  isRefreshing: boolean;
   refresh: () => void;
 }
 
@@ -16,6 +18,8 @@ export function useLiveRefresh<T>(
 ): LiveRefreshState<T> {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const version = useLiveVersion(eventTypes);
   const fetchRef = useRef(fetchFn);
 
@@ -25,16 +29,21 @@ export function useLiveRefresh<T>(
 
   const refresh = useCallback(() => {
     let cancelled = false;
+    setIsRefreshing(true);
     fetchRef.current()
       .then((result) => {
         if (!cancelled) {
           setData(result);
           setError(null);
+          setIsLoading(false);
+          setIsRefreshing(false);
         }
       })
       .catch((err: unknown) => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : String(err));
+          setIsLoading(false);
+          setIsRefreshing(false);
         }
       });
     return () => {
@@ -49,7 +58,7 @@ export function useLiveRefresh<T>(
       cancel();
       clearInterval(id);
     };
-  }, [refresh, version, fallbackIntervalMs]);
+  }, [fetchFn, refresh, version, fallbackIntervalMs]);
 
-  return { data, error, refresh };
+  return { data, error, isLoading, isRefreshing, refresh };
 }

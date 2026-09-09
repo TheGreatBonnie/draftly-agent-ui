@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { AuthTokenSetter } from "@/components/dashboard/auth-token-setter";
 import { AppShell } from "@/components/layout";
+import { LiveEventsProvider } from "@/components/live-events/live-events-provider";
 import { ThemeProvider } from "@/components/theme";
 
 export const metadata: Metadata = {
@@ -20,7 +21,9 @@ export default async function RootLayout({
     <>
       <AuthTokenSetter />
       <ThemeProvider>
-        <AppShell>{children}</AppShell>
+        <LiveEventsProvider>
+          <AppShell>{children}</AppShell>
+        </LiveEventsProvider>
       </ThemeProvider>
     </>
   );
