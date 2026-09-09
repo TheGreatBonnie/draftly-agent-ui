@@ -29,20 +29,23 @@ export async function deleteGitHubInstallation(installationId: number) {
 export interface ReviewDecisionResult {
   status: string;
   run_id: string;
+  rework_run_id?: string | null;
 }
 
-/** Approve/reject a pending review via the existing resume route
+export type ReviewDecision = "approve" | "request_changes" | "reject";
+
+/** Apply a decision to a pending review via the existing resume route
  *  (POST /github/review/{run_id}); the server trusts the stored review
  *  identity over any client-supplied reviewer id. */
 export async function decideReview(
   runId: string,
-  approved: boolean,
+  decision: ReviewDecision,
   comment?: string,
 ): Promise<ReviewDecisionResult> {
   return request(`/github/review/${encodeURIComponent(runId)}`, {
     method: "POST",
     body: JSON.stringify({
-      approved,
+      decision,
       reviewer_id: "",
       comment: comment ?? null,
     }),

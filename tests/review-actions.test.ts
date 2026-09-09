@@ -10,14 +10,22 @@ test("only pending reviews can be decided", () => {
 });
 
 test("builds approve and reject decisions with trimmed optional comments", () => {
-  assert.deepEqual(buildReviewDecision("run-1", true, "  ship it  "), {
+  assert.deepEqual(buildReviewDecision("run-1", "approve", "  ship it  "), {
     runId: "run-1",
-    approved: true,
+    decision: "approve",
     comment: "ship it",
   });
-  assert.deepEqual(buildReviewDecision("run-1", false, "   "), {
+  assert.deepEqual(buildReviewDecision("run-1", "reject", "   "), {
     runId: "run-1",
-    approved: false,
+    decision: "reject",
     comment: undefined,
+  });
+});
+
+test("builds a request-changes decision with a required trimmed comment", () => {
+  assert.deepEqual(buildReviewDecision("run-1", "request_changes", "  add rollback steps  "), {
+    runId: "run-1",
+    decision: "request_changes",
+    comment: "add rollback steps",
   });
 });

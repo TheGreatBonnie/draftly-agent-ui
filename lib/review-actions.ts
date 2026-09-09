@@ -2,11 +2,13 @@ export function canDecideReview(status: string): boolean {
   return status.toLowerCase() === "pending";
 }
 
+export type ReviewDecisionKind = "approve" | "request_changes" | "reject";
+
 export function buildReviewDecision(
   runId: string,
-  approved: boolean,
+  decision: ReviewDecisionKind,
   comment: string,
-): { runId: string; approved: boolean; comment: string | undefined } {
+): { runId: string; decision: ReviewDecisionKind; comment: string | undefined } {
   const trimmed = comment.trim();
-  return { runId, approved, comment: trimmed || undefined };
+  return { runId, decision, comment: trimmed || undefined };
 }
