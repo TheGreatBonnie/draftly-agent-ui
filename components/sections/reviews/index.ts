@@ -1,1 +1,1 @@
-export { ReviewsSubpage } from "../../section-subpage";
+export { ReviewsSubpage } from "../../dashboard/section-subpage";

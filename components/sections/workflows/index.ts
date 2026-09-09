@@ -1,1 +1,1 @@
-export { WorkflowsSubpage } from "../../section-subpage";
+export { WorkflowsSubpage } from "../../dashboard/section-subpage";

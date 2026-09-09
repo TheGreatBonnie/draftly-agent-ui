@@ -1,2 +1,2 @@
-export { ThemeProvider, useTheme } from "../theme-provider";
-export { ThemeSwitcher } from "../theme-switcher";
+export { ThemeProvider, useTheme } from "../dashboard/theme-provider";
+export { ThemeSwitcher } from "../dashboard/theme-switcher";

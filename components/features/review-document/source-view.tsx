@@ -1,1 +1,1 @@
-export { default } from "../../review-document";
+export { default } from "../../dashboard/review-document";

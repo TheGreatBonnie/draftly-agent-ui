@@ -1,1 +1,1 @@
-export { default } from "../../review-actions";
+export { default } from "../../dashboard/review-actions";

@@ -1,1 +1,1 @@
-export { ActivitySubpage } from "../../section-subpage";
+export { ActivitySubpage } from "../../dashboard/section-subpage";
