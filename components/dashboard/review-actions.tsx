@@ -1,79 +1,89 @@
 "use client";
 import { useState } from "react";
-import { Check, RotateCcw, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Button, MockDialog } from "@/components/dashboard/ui";
-export default function ReviewActions() {
-  const [dialog, setDialog] = useState<"approve" | "changes" | "reject" | null>(
-    null,
-  );
-  const [status, setStatus] = useState("Pending review");
+
+import { decideReview, type ReviewDecisionResult } from "@/api/github";
+import { buildReviewDecision, canDecideReview } from "@/lib/review-actions";
+
+export interface ReviewActionsProps {
+  runId: string;
+  status: string;
+  onDecisionSaved?: (result: ReviewDecisionResult) => void;
+}
+
+export default function ReviewActions({ runId, status, onDecisionSaved }: ReviewActionsProps) {
+  const [dialog, setDialog] = useState<"approve" | "reject" | null>(null);
+  const [comment, setComment] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const actionable = canDecideReview(status);
+
+  async function submitDecision() {
+    if (!dialog || pending || !actionable) return;
+    setPending(true);
+    setError(null);
+    const decision = buildReviewDecision(runId, dialog === "approve", comment);
+    try {
+      const result = await decideReview(decision.runId, decision.approved, decision.comment);
+      setDialog(null);
+      setComment("");
+      onDecisionSaved?.(result);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (!actionable) return <span className="text-xs text-foreground-muted">Decision recorded</span>;
+
   return (
     <>
       <div className="flex flex-wrap gap-2">
         <Button
           onClick={() => setDialog("approve")}
+          disabled={pending}
           className="border-emerald-300 text-emerald-700">
           <Check className="h-4 w-4" />
           Approve
         </Button>
         <Button
-          onClick={() => setDialog("changes")}
-          className="border-amber-300 text-amber-700">
-          <RotateCcw className="h-4 w-4" />
-          Request changes
-        </Button>
-        <Button
           onClick={() => setDialog("reject")}
+          disabled={pending}
           className="border-rose-300 text-rose-700">
           <X className="h-4 w-4" />
           Reject
         </Button>
       </div>
+      {error && <p className="mt-2 max-w-xs text-xs text-danger">{error}</p>}
       <MockDialog
         open={dialog !== null}
-        onClose={() => setDialog(null)}
+        onClose={() => { if (!pending) setDialog(null); }}
         title={
           dialog === "approve"
             ? "Approve documentation change?"
-            : dialog === "changes"
-              ? "Request changes from Draftly?"
-              : "Reject this change?"
+            : "Reject this change?"
         }
         description={
           dialog === "approve"
-            ? "The approved mock change will move to delivery."
-            : dialog === "changes"
-              ? "Your feedback becomes input to the next mock agent revision."
-              : "This mock proposal will be marked rejected."
+            ? "The approved change will move to delivery."
+            : "This proposal will be marked rejected."
         }
         confirmLabel={
-          dialog === "approve"
-            ? "Approve"
-            : dialog === "changes"
-              ? "Request changes"
-              : "Reject"
+          pending ? "Submitting…" : dialog === "approve" ? "Approve" : "Reject"
         }
         danger={dialog === "reject"}
-        onConfirm={() =>
-          setStatus(
-            dialog === "approve"
-              ? "Approved"
-              : dialog === "changes"
-                ? "Needs changes"
-                : "Rejected",
-          )
-        }>
+        closeOnConfirm={false}
+        confirmDisabled={pending}
+        onConfirm={() => { void submitDecision(); }}>
         <textarea
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
           className="h-24 w-full rounded-lg border border-slate-200 p-3 text-sm outline-none"
-          placeholder={
-            dialog === "changes"
-              ? "Clarify what Draftly should revise..."
-              : "Add an optional comment..."
-          }
+          placeholder="Add an optional comment..."
+          disabled={pending}
         />
-        <div className="mt-2 text-xs text-slate-400">
-          Current mock state: {status}
-        </div>
       </MockDialog>
     </>
   );
