@@ -4307,7 +4307,7 @@
       "file_type": "code",
       "norm_label": "footercolumn()",
       "source_file": "components/landing/footer.tsx",
-      "source_location": "L98"
+      "source_location": "L101"
     },
     {
       "id": "components_landing_hero_hero",
@@ -24450,6 +24450,17 @@
     },
     {
       "source": "components_landing_footer",
+      "target": "components_landing_footer_footercolumn",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/landing/footer.tsx",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "components_landing_footer",
       "target": "components_landing_footer_footer",
       "relation": "contains",
       "_origin": "ast",
@@ -24457,17 +24468,6 @@
       "confidence_score": 1.0,
       "source_file": "components/landing/footer.tsx",
       "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "components_landing_footer",
-      "target": "components_landing_footer_footercolumn",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/landing/footer.tsx",
-      "source_location": "L98",
       "weight": 1.0
     },
     {

@@ -1,7 +1,7 @@
 # Graph Report - draftly-agent-ui  (2026-09-09)
 
 ## Corpus Check
-- 188 files · ~779,588 words
+- 188 files · ~779,595 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5a625397`
+- Built from commit: `181ee84e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

@@ -900,21 +900,21 @@
     "semantic_hash": ""
   },
   "components/landing/final-cta.tsx": {
-    "mtime": 1788924242.974285,
-    "seen": 1788926665.513464,
-    "ast_hash": "31b3c96e4b7485e96be37f28082f8752",
+    "mtime": 1788930182.2096899,
+    "seen": 1788930189.534049,
+    "ast_hash": "0f1c5c9d4e716fbf3119784675aaabb6",
     "semantic_hash": ""
   },
   "components/landing/footer.tsx": {
-    "mtime": 1788929428.527483,
-    "seen": 1788929441.027949,
-    "ast_hash": "278cd88475a5bbfd2e9a4443865962be",
+    "mtime": 1788929462.737535,
+    "seen": 1788929572.7347782,
+    "ast_hash": "fab6b7a33c8730bc814df3c8ab47aace",
     "semantic_hash": ""
   },
   "components/landing/hero.tsx": {
-    "mtime": 1788924242.9771452,
-    "seen": 1788926665.5134668,
-    "ast_hash": "e0425f419c1a5781de1f0997d57d0d4c",
+    "mtime": 1788929904.1779199,
+    "seen": 1788929912.5562592,
+    "ast_hash": "7470978b770209c077685b05499651b9",
     "semantic_hash": ""
   },
   "components/landing/integrations-section.tsx": {
@@ -930,9 +930,9 @@
     "semantic_hash": ""
   },
   "components/landing/navbar.tsx": {
-    "mtime": 1788929439.8226204,
-    "seen": 1788929441.027961,
-    "ast_hash": "4cde363166a8ebcf13fc0b586fc02dea",
+    "mtime": 1788929845.6360805,
+    "seen": 1788929852.998571,
+    "ast_hash": "9e8e9f25f88ae6cfcfd3f8df96a005d5",
     "semantic_hash": ""
   },
   "components/landing/system-flow.tsx": {

@@ -2855,7 +2855,7 @@
       "file_type": "code",
       "norm_label": "rootlayout()",
       "source_file": "app/layout.tsx",
-      "source_location": "L10"
+      "source_location": "L14"
     },
     {
       "id": "components_dashboard_shell_agentstatusillustration",
@@ -23741,7 +23741,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/layout.tsx",
-      "source_location": "L10",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -27400,5 +27400,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5a625397a1e8a97615af9edc7376859d3d422c79"
+  "built_at_commit": "181ee84ead8096dcde4d99f54e7d9dba538bd459"
 }

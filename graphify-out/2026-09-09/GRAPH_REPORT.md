@@ -1,7 +1,7 @@
 # Graph Report - draftly-agent-ui  (2026-09-09)
 
 ## Corpus Check
-- 188 files · ~779,584 words
+- 188 files · ~779,588 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
