@@ -17,6 +17,19 @@ test("formats nullable evaluation values without inventing data", () => {
   assert.equal(formatTrend(null), null);
 });
 
+test("maps evaluation scores to bounded progress-ring ratios", async () => {
+  const module = await import("../lib/overview.ts");
+  const scoreToProgress = (
+    module as { scoreToProgress?: (value: number | null) => number }
+  ).scoreToProgress;
+
+  assert.equal(scoreToProgress?.(100), 1);
+  assert.equal(scoreToProgress?.(75), 0.75);
+  assert.equal(scoreToProgress?.(null), 0);
+  assert.equal(scoreToProgress?.(-10), 0);
+  assert.equal(scoreToProgress?.(120), 1);
+});
+
 test("formats activity dates and relative timestamps consistently", () => {
   assert.equal(formatActivityDate("2026-09-05"), "Sep 5");
   assert.equal(

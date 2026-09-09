@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Activity, Bot, Database, FileCheck2, FileText, GitPullRequest, SearchCheck, ServerCog, Sparkles, Star, Workflow } from "lucide-react";
 import type { OverviewSnapshot } from "@/api/overview";
 import { Badge, Card, IconTile, MetricCard, Progress, SectionTitle, TinyLink } from "@/components/dashboard/ui";
-import { formatRelativeTime, formatScore, formatTrend, statusTone } from "@/lib/overview";
+import { formatRelativeTime, formatScore, formatTrend, scoreToProgress, statusTone } from "@/lib/overview";
 
 const systemIcons = [Bot, Database, SearchCheck, ServerCog];
 
@@ -24,7 +24,38 @@ export function RecentChanges({ items }: { items: OverviewSnapshot["recent_chang
 export function EvaluationResults({ evaluation }: { evaluation: OverviewSnapshot["evaluation"] }) {
   const trend = formatTrend(evaluation.trend);
   const tones = ["green", "blue", "violet", "amber", "green"] as const;
-  return <Card><SectionTitle icon={<FileCheck2 className="h-4 w-4" />} title="Evaluation results" subtitle="Quality signals from recent runs" action={<TinyLink href="/evaluations">View all</TinyLink>} /><div className="grid gap-4 p-4 sm:grid-cols-[112px_1fr] sm:items-center"><div className="mx-auto grid h-28 w-28 place-items-center rounded-full border-[10px] border-success text-center"><div><strong className="text-2xl">{formatScore(evaluation.average_score)}</strong><div className="text-[10px] text-foreground-muted">Average score</div>{trend && <Badge tone={evaluation.trend !== null && evaluation.trend >= 0 ? "green" : "rose"}>{trend}</Badge>}</div></div><div className="grid min-w-0 gap-3">{evaluation.dimensions.length === 0 ? <p className="text-sm text-foreground-muted">No evaluation dimensions recorded yet.</p> : evaluation.dimensions.map(({ name, value }, index) => <div key={name}><div className="mb-1 flex items-center justify-between gap-2 text-xs"><span>{name}</span><span className="font-medium">{formatScore(value)}</span></div><Progress value={value} tone={tones[index % tones.length]} /></div>)}</div></div></Card>;
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  const progress = scoreToProgress(evaluation.average_score);
+  const scoreLabel = formatScore(evaluation.average_score);
+
+  return <Card>
+    <SectionTitle icon={<FileCheck2 className="h-4 w-4" />} title="Evaluation results" subtitle="Quality signals from recent runs" action={<TinyLink href="/evaluations">View all</TinyLink>} />
+    <div className="grid gap-5 p-4 sm:grid-cols-[120px_minmax(0,1fr)] sm:items-center">
+      <div role="img" aria-label={`Average evaluation score: ${scoreLabel}`} className="relative mx-auto h-28 w-28 shrink-0">
+        <svg aria-hidden="true" className="h-full w-full -rotate-90" viewBox="0 0 112 112">
+          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="10" className="text-surface-subtle" />
+          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" className="text-success transition-[stroke-dashoffset] duration-500" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - progress)} />
+        </svg>
+        <div className="absolute inset-0 grid place-items-center px-2 text-center">
+          <div className="flex min-w-0 flex-col items-center gap-1.5">
+            <strong className="whitespace-nowrap text-2xl leading-none tabular-nums">{scoreLabel}</strong>
+            <span className="text-[10px] leading-4 text-foreground-muted">Average score</span>
+            {trend && <Badge tone={evaluation.trend !== null && evaluation.trend >= 0 ? "green" : "rose"}>{trend}</Badge>}
+          </div>
+        </div>
+      </div>
+      <div className="grid min-w-0 gap-3">
+        {evaluation.dimensions.length === 0 ? <p className="text-sm text-foreground-muted">No evaluation dimensions recorded yet.</p> : evaluation.dimensions.map(({ name, value }, index) => <div key={name}>
+          <div className="mb-1 flex items-center justify-between gap-3 text-xs leading-5">
+            <span className="min-w-0 truncate">{name}</span>
+            <span className="shrink-0 whitespace-nowrap font-medium tabular-nums">{formatScore(value)}</span>
+          </div>
+          <Progress value={value} tone={tones[index % tones.length]} />
+        </div>)}
+      </div>
+    </div>
+  </Card>;
 }
 
 export function ActiveWorkflows({ workflows }: { workflows: OverviewSnapshot["active_workflows"] }) {

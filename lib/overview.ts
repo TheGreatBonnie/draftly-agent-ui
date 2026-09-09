@@ -20,6 +20,11 @@ export function formatScore(value: number | null): string {
   return value === null ? "—" : `${Number.isInteger(value) ? value : value.toFixed(1)}%`;
 }
 
+export function scoreToProgress(value: number | null): number {
+  if (value === null || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, value)) / 100;
+}
+
 export function formatTrend(value: number | null): string | null {
   if (value === null) return null;
   const amount = Number.isInteger(value) ? Math.abs(value) : Math.abs(value).toFixed(1);
