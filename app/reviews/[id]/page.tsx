@@ -8,8 +8,8 @@ import {
   Github,
   MessageSquare,
 } from "lucide-react";
-import ReviewActions from "@/components/review-actions";
-import ReviewDocument from "@/components/review-document";
+import ReviewActions from "@/components/features/review-actions";
+import ReviewDocument from "@/components/features/review-document";
 import { Badge, Button, Card, Progress, SectionTitle, Tabs } from "@/components/ui";
 import { reviews } from "@/lib/mock-data";
 

@@ -1,2 +1,2 @@
-import { ReviewsSubpage } from "@/components/section-subpage";
+import { ReviewsSubpage } from "@/components/sections/reviews";
 export default function Page(){return <ReviewsSubpage kind="pending"/>}

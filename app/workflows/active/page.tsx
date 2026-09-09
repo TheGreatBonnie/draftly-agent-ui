@@ -1,2 +1,2 @@
-import { WorkflowsSubpage } from "@/components/section-subpage";
+import { WorkflowsSubpage } from "@/components/sections/workflows";
 export default function Page(){return <WorkflowsSubpage kind="active"/>}

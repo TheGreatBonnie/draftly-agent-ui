@@ -69,3 +69,15 @@ The following top-level areas use horizontally scrollable responsive tabs that m
 - Agents: `/agents/active`, `/agents/idle`, `/agents/templates`
 
 The shared route configuration is in `components/section-tabs.tsx`; reusable mock subpage presentations are in `components/section-subpage.tsx`.
+
+## Component structure
+
+The UI is organized into focused boundaries:
+
+- `components/primitives/` contains reusable visual primitives. `components/ui.tsx` remains as a compatibility barrel for existing routes.
+- `components/layout/` contains the application-shell entry point.
+- `components/sections/` contains route-family entry points for activity, reviews, evaluations, documentation, workflows, and agents.
+- `components/features/` contains domain-specific review components.
+- `components/theme/` contains the theme feature entry point.
+
+New code should import from these focused directories instead of adding more exports to `components/ui.tsx` or `components/shell.tsx`.

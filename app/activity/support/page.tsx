@@ -1,2 +1,2 @@
-import { ActivitySubpage } from "@/components/section-subpage";
+import { ActivitySubpage } from "@/components/sections/activity";
 export default function Page(){return <ActivitySubpage kind="support"/>}

@@ -1,2 +1,2 @@
-import { DocumentationSubpage } from "@/components/section-subpage";
+import { DocumentationSubpage } from "@/components/sections/documentation";
 export default function Page(){return <DocumentationSubpage kind="outdated"/>}
