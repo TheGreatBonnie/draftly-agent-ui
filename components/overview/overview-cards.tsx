@@ -24,7 +24,7 @@ export function RecentChanges({ items }: { items: OverviewSnapshot["recent_chang
 export function EvaluationResults({ evaluation }: { evaluation: OverviewSnapshot["evaluation"] }) {
   const trend = formatTrend(evaluation.trend);
   const tones = ["green", "blue", "violet", "amber", "green"] as const;
-  const radius = 50;
+  const radius = 51;
   const circumference = 2 * Math.PI * radius;
   const progress = scoreToProgress(evaluation.average_score);
   const scoreLabel = formatScore(evaluation.average_score);
@@ -34,8 +34,8 @@ export function EvaluationResults({ evaluation }: { evaluation: OverviewSnapshot
     <div className="grid gap-5 p-4 sm:grid-cols-[120px_minmax(0,1fr)] sm:items-center">
       <div role="img" aria-label={`Average evaluation score: ${scoreLabel}`} className="relative mx-auto h-28 w-28 shrink-0">
         <svg aria-hidden="true" className="h-full w-full -rotate-90" viewBox="0 0 112 112">
-          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="8" className="text-surface-subtle" />
-          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" className="text-success transition-[stroke-dashoffset] duration-500" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - progress)} />
+          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="9" className="text-surface-subtle" />
+          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="9" strokeLinecap="round" className="text-success transition-[stroke-dashoffset] duration-500" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - progress)} />
         </svg>
         <div className="absolute inset-0 grid place-items-center px-2 text-center">
           <div className="flex min-w-0 flex-col items-center gap-1">
