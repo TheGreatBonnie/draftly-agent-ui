@@ -1,1 +1,2 @@
-export { ReviewsSubpage } from "../../dashboard/section-subpage";
+export { default as ReviewsPage } from "./reviews-page";
+export { default as ReviewsSubpage } from "./reviews-subpage";
