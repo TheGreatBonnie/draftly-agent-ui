@@ -13,7 +13,7 @@ export interface LiveRefreshState<T> {
 
 export function useLiveRefresh<T>(
   fetchFn: () => Promise<T>,
-  eventTypes: string[],
+  eventTypes: readonly string[],
   fallbackIntervalMs = 30_000,
 ): LiveRefreshState<T> {
   const [data, setData] = useState<T | null>(null);

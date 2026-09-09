@@ -38,6 +38,6 @@ export function useLiveEventVersion(): number {
   return useContext(LiveVersionContext);
 }
 
-export function useLiveVersion(_eventTypes: string[]): number {
+export function useLiveVersion(_eventTypes: readonly string[]): number {
   return useLiveEventVersion();
 }

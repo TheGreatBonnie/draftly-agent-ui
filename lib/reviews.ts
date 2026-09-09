@@ -41,6 +41,8 @@ export interface ReviewFileViewModel {
   originalContentAvailable: boolean;
 }
 
+export const REVIEW_LIVE_EVENTS = ["workflow:changed", "review:completed"] as const;
+
 const EMPTY_EVALUATION: ReviewDisplayEvaluation = {
   overall_score: null,
   dimensions: [],

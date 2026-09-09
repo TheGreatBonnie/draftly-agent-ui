@@ -6,8 +6,8 @@ import type { ReviewListCounts } from "@/api/observability";
 export const sectionTabs = {
   reviews: [
     { label: "All reviews", href: "/reviews" },
-    { label: "Pending", href: "/reviews/pending", count: 12 },
-    { label: "Needs attention", href: "/reviews/needs-attention", count: 4 },
+    { label: "Pending", href: "/reviews/pending" },
+    { label: "Needs attention", href: "/reviews/needs-attention" },
     { label: "Approved", href: "/reviews/approved" },
     { label: "Rejected", href: "/reviews/rejected" },
   ],
