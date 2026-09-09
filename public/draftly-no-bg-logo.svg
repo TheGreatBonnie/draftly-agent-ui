@@ -1,0 +1,59 @@
+<svg viewBox="130 180 960 880" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="draftlyPrimary" x1="300" y1="230" x2="900" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1976D2"/>
+      <stop offset="0.43" stop-color="#1554D1"/>
+      <stop offset="1" stop-color="#5B1FD8"/>
+    </linearGradient>
+    <linearGradient id="streamGradient" x1="245" y1="500" x2="500" y2="540" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B8DEB"/>
+      <stop offset="0.48" stop-color="#1770DC"/>
+      <stop offset="1" stop-color="#3F2BC8"/>
+    </linearGradient>
+    <linearGradient id="nodeGradient" x1="150" y1="500" x2="235" y2="545" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B91EE"/>
+      <stop offset="1" stop-color="#2560D5"/>
+    </linearGradient>
+    <linearGradient id="foldGradient" x1="753" y1="335" x2="900" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7783DB"/>
+      <stop offset="1" stop-color="#8A79DB"/>
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="575" y1="727" x2="690" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2B5FD5"/>
+      <stop offset="1" stop-color="#4A42D0"/>
+    </linearGradient>
+    <filter id="softShadow" x="120" y="180" width="1000" height="880" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#1E3A8A" flood-opacity="0.14"/>
+    </filter>
+    <filter id="smallShadow" x="540" y="535" width="330" height="80" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0F172A" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <path
+      d="M404 230 H718 C900 230 1033 390 1033 607 C1033 826 900 986 718 986 H404 C383 986 366 969 366 948 V797 C366 784 376 774 389 774 H443 C457 774 469 763 469 749 C469 735 457 725 443 725 H389 C376 725 366 715 366 702 V563 C366 550 376 540 389 540 H443 C457 540 469 529 469 515 C469 501 457 494 443 494 H389 C376 494 366 483 366 470 V268 C366 247 383 230 404 230 Z"
+      fill="url(#draftlyPrimary)"
+    />
+  </g>
+
+  <path d="M295 494 H498 V540 H295 C282 540 272 530 272 517 C272 504 282 494 295 494 Z" fill="url(#streamGradient)"/>
+  <path d="M387 587 H498 V633 H387 C374 633 364 623 364 610 C364 597 374 587 387 587 Z" fill="url(#streamGradient)"/>
+  <path d="M265 680 H498 V726 H265 C252 726 242 716 242 703 C242 690 252 680 265 680 Z" fill="url(#streamGradient)"/>
+
+  <circle cx="203" cy="517" r="24" fill="url(#nodeGradient)"/>
+  <circle cx="282" cy="610" r="24" fill="url(#nodeGradient)"/>
+  <circle cx="179" cy="703" r="24" fill="url(#nodeGradient)"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M528 333 H752 L889 472 C906 490 914 514 914 541 V617 C914 758 830 871 712 871 H528 C511 871 498 858 498 841 V358 C498 341 511 333 528 333 Z" fill="#FFFFFF"/>
+    <path d="M752 333 L889 472 H780 C765 472 752 459 752 444 Z" fill="url(#foldGradient)"/>
+  </g>
+
+  <g filter="url(#smallShadow)">
+    <rect x="575" y="557" width="257" height="36" rx="18" fill="#001341"/>
+    <rect x="575" y="644" width="257" height="36" rx="18" fill="#001341"/>
+  </g>
+  <rect x="575" y="726" width="113" height="34" rx="17" fill="url(#accentGradient)"/>
+  <circle cx="732" cy="743" r="19" fill="#001341"/>
+</svg>
