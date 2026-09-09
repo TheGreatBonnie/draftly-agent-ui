@@ -37,6 +37,7 @@ export interface ReviewSummary {
   interrupt_id: string | null;
   // Task 10 structured fields (optional until backend deployed)
   detail?: Record<string, unknown> | null;
+  display?: ReviewDisplay | null;
   pr?: {
     title?: string;
     trigger_label?: string;
@@ -45,6 +46,71 @@ export interface ReviewSummary {
     repo?: string;
     issue_number?: number;
   } | null;
+}
+
+export interface ReviewDisplayFile {
+  path: string;
+  action: string | null;
+  original_content: string | null;
+  proposed_content: string | null;
+  original_content_available: boolean;
+}
+
+export interface ReviewEvaluationDimension {
+  name?: string;
+  value?: number | null;
+  [key: string]: unknown;
+}
+
+export interface ReviewEvidenceItem {
+  id?: string;
+  title?: string;
+  detail?: string;
+  count?: number | string;
+  url?: string | null;
+  [key: string]: unknown;
+}
+
+export interface ReviewDisplayEvaluation {
+  overall_score: number | null;
+  dimensions: ReviewEvaluationDimension[];
+  reasons: string[];
+  count: number | null;
+}
+
+export interface ReviewDisplay {
+  title: string | null;
+  reference: string | null;
+  description: string | null;
+  repository: string | null;
+  files: ReviewDisplayFile[];
+  change_type: string | null;
+  risk: string | null;
+  evaluation: ReviewDisplayEvaluation;
+  evidence: ReviewEvidenceItem[];
+  github_url: string | null;
+  updated_at: string | null;
+}
+
+export interface ReviewListCounts {
+  pending: number;
+  urgent: number;
+  approved: number;
+  needs_changes: number;
+  rejected: number;
+}
+
+export interface ReviewListResponse {
+  items: ReviewSummary[];
+  total?: number;
+  counts?: ReviewListCounts;
+  next_cursor?: string | null;
+}
+
+export interface ReviewListOptions {
+  status?: string;
+  limit?: number;
+  cursor?: string;
 }
 
 export interface ModelPerformance {
@@ -83,11 +149,22 @@ export async function getRunSteps(
 }
 
 export async function listReviews(
+  options?: ReviewListOptions,
+): Promise<ReviewListResponse>;
+export async function listReviews(
   status?: string,
-  limit = 100,
-): Promise<{ items: ReviewSummary[] }> {
-  const params = new URLSearchParams({ limit: String(limit) });
-  if (status) params.set("status", status);
+  limit?: number,
+): Promise<ReviewListResponse>;
+export async function listReviews(
+  optionsOrStatus: ReviewListOptions | string = {},
+  positionalLimit = 100,
+): Promise<ReviewListResponse> {
+  const options = typeof optionsOrStatus === "string"
+    ? { status: optionsOrStatus, limit: positionalLimit }
+    : optionsOrStatus;
+  const params = new URLSearchParams({ limit: String(options.limit ?? 100) });
+  if (options.status) params.set("status", options.status);
+  if (options.cursor) params.set("cursor", options.cursor);
   return request(`/reviews?${params.toString()}`);
 }
 
