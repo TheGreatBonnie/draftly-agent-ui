@@ -10,6 +10,7 @@ export default {
       colors: {
         background: token("background"), surface: token("surface"), "surface-elevated":token("surface-elevated"), "surface-muted":token("surface-muted"), "surface-subtle":token("surface-subtle"),
         foreground: token("foreground"), "foreground-secondary":token("foreground-secondary"), "foreground-muted":token("foreground-muted"),
+        primary: token("primary"), "primary-foreground": token("primary-foreground"), muted: token("muted"), "muted-background": token("muted-background"), "surface-secondary": token("surface-secondary"),
         border: token("border"), "border-strong":token("border-strong"), brand: token("brand"), "brand-foreground":token("brand-foreground"), "brand-soft":token("brand-soft"),
         success: token("success"), "success-soft":token("success-soft"), warning:token("warning"), "warning-soft":token("warning-soft"), danger:token("danger"), "danger-soft":token("danger-soft"),
         violetToken:token("violet"), "violet-soft":token("violet-soft"), cyanToken:token("cyan"), "cyan-soft":token("cyan-soft"), input:token("input"), ring:token("ring"), code:token("code"), "code-foreground":token("code-foreground")

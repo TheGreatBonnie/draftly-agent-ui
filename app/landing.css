@@ -1,0 +1,206 @@
+.landing-theme {
+  --background: 251 253 255;
+  --foreground: 9 18 57;
+  --muted: 77 88 121;
+  --muted-background: 246 248 255;
+  --border: 223 229 243;
+  --primary: 67 56 242;
+  --primary-foreground: 255 255 255;
+  --surface: 255 255 255;
+  --surface-secondary: 247 249 255;
+  --radius: 8px;
+}
+
+.dark .landing-theme {
+  --background: 11 15 20;
+  --foreground: 248 250 252;
+  --muted: 148 163 184;
+  --muted-background: 17 24 39;
+  --border: 30 41 59;
+  --primary: 67 56 242;
+  --primary-foreground: 255 255 255;
+  --surface: 15 23 42;
+  --surface-secondary: 17 24 39;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+}
+
+.landing-theme {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 12% 10%,
+      rgba(81, 58, 255, 0.13),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 84% 14%,
+      rgba(53, 218, 210, 0.14),
+      transparent 26rem
+    ),
+    rgb(var(--background));
+  color: rgb(var(--foreground));
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.landing-theme ::selection {
+  background: rgb(var(--primary));
+  color: rgb(var(--primary-foreground));
+}
+
+.container-draftly {
+  width: min(1110px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: 34px;
+}
+
+.section-small {
+  padding-block: 26px;
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  line-height: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.display-heading {
+  font-size: clamp(3.1rem, 6.2vw, 5.35rem);
+  line-height: 1.03;
+  letter-spacing: -0.055em;
+  font-weight: 800;
+}
+
+.section-heading {
+  font-size: clamp(1.75rem, 3vw, 3.05rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+}
+
+.body-large {
+  font-size: clamp(1rem, 1.35vw, 1.125rem);
+  line-height: 1.75;
+}
+
+.draftly-card {
+  border: 1px solid rgb(var(--border));
+  background: rgb(var(--surface) / 0.88);
+  box-shadow: 0 18px 45px rgba(15, 25, 60, 0.08);
+}
+
+.dot-field {
+  background-image: radial-gradient(
+    circle,
+    rgba(67, 56, 242, 0.2) 1px,
+    transparent 1.4px
+  );
+  background-size: 12px 12px;
+}
+
+.hero-dot-field-left,
+.hero-dot-field-right {
+  background-size:
+    auto,
+    12px 12px;
+}
+
+.hero-dot-field-left {
+  background-image:
+    radial-gradient(circle at 0 54%, rgba(99, 82, 255, 0.2), transparent 72%),
+    radial-gradient(circle, rgba(67, 56, 242, 0.2) 1px, transparent 1.4px);
+}
+
+.hero-dot-field-right {
+  background-image:
+    radial-gradient(
+      circle at 100% 54%,
+      rgba(99, 82, 255, 0.16),
+      transparent 72%
+    ),
+    radial-gradient(circle, rgba(67, 56, 242, 0.2) 1px, transparent 1.4px);
+}
+
+.soft-panel {
+  border: 1px solid rgb(var(--border));
+  background: rgb(var(--surface) / 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 20px 55px rgba(22, 34, 78, 0.06);
+}
+
+.footer-dark {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      circle at 78% 18%,
+      rgba(67, 56, 242, 0.26),
+      transparent 28rem
+    ),
+    linear-gradient(135deg, #081022 0%, #0a1430 52%, #091126 100%);
+}
+
+.flow-connector,
+.flow-arrow-head {
+  fill: none;
+  stroke: rgb(var(--primary));
+  opacity: 0.76;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.flow-connector {
+  stroke-dasharray: 1 4.5;
+}
+
+.landing-theme [class~="bg-white/84"] {
+  background-color: rgb(var(--surface) / 0.84);
+}
+
+.landing-theme [class~="bg-white/88"] {
+  background-color: rgb(var(--surface) / 0.88);
+}
+
+@media (max-width: 768px) {
+  .container-draftly {
+    width: min(100% - 32px, 1180px);
+  }
+
+  .section {
+    padding-block: 80px;
+  }
+
+  .section-small {
+    padding-block: 56px;
+  }
+}

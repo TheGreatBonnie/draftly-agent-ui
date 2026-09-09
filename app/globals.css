@@ -223,6 +223,123 @@ textarea:focus-visible {
   }
 }
 
+/* Onboarding theme bridge. The onboarding screens predate the dashboard's
+ * semantic tokens and still use screenshot-matched utility colors. Keep the
+ * light palette unchanged while giving those existing surfaces a complete
+ * dark-mode mapping inside the onboarding boundary. */
+.onboarding-theme {
+  --onboarding-bg: 244 247 252;
+  --onboarding-surface: 255 255 255;
+  --onboarding-rail: 248 250 252;
+  --onboarding-text: 16 26 67;
+  --onboarding-secondary: 80 97 138;
+  --onboarding-muted: 113 128 155;
+  --onboarding-border: 217 225 240;
+  --onboarding-slack-pink: #e01e5a;
+  --onboarding-slack-cyan: #36c5f0;
+  --onboarding-slack-green: #2eb67d;
+  --onboarding-slack-yellow: #ecb22e;
+  --onboarding-discord: #5865f2;
+  --onboarding-github: #24292f;
+  --onboarding-brand-mark: #1260ed;
+  --onboarding-brand-mark-line: #ffffff;
+  --onboarding-brand-mark-detail: #b9d2fb;
+}
+
+.dark .onboarding-theme {
+  --onboarding-bg: 8 12 22;
+  --onboarding-surface: 14 20 32;
+  --onboarding-rail: 17 24 39;
+  --onboarding-text: 241 245 249;
+  --onboarding-secondary: 203 213 225;
+  --onboarding-muted: 148 163 184;
+  --onboarding-border: 37 49 68;
+  --onboarding-slack-pink: #ff4f87;
+  --onboarding-slack-cyan: #61d9ff;
+  --onboarding-slack-green: #4bd494;
+  --onboarding-slack-yellow: #ffd15c;
+  --onboarding-discord: #8790ff;
+  --onboarding-github: #f1f5f9;
+  --onboarding-brand-mark: #5b8cff;
+  --onboarding-brand-mark-line: #08101f;
+  --onboarding-brand-mark-detail: #b9d2fb;
+}
+
+.dark .onboarding-theme [class~="bg-[#f4f7fc]"],
+.dark .onboarding-theme [class~="bg-[#f8fafc]"] {
+  background-color: rgb(var(--onboarding-bg)) !important;
+}
+.dark .onboarding-theme [class~="bg-[#f8fafc]"] { background-color: rgb(var(--onboarding-rail)) !important; }
+.dark .onboarding-theme [class~="bg-white"],
+.dark .onboarding-theme [class~="bg-white/60"] { background-color: rgb(var(--onboarding-surface)) !important; }
+
+.dark .onboarding-theme [class~="text-[#101a43]"],
+.dark .onboarding-theme [class~="text-[#17224c]"] { color: rgb(var(--onboarding-text)) !important; }
+.dark .onboarding-theme [class~="text-[#45547d]"],
+.dark .onboarding-theme [class~="text-[#50618a]"],
+.dark .onboarding-theme [class~="text-[#51628d]"],
+.dark .onboarding-theme [class~="text-[#53648e]"],
+.dark .onboarding-theme [class~="text-[#5665ec]"],
+.dark .onboarding-theme [class~="text-[#647397]"],
+.dark .onboarding-theme [class~="text-[#657494]"],
+.dark .onboarding-theme [class~="text-[#6b7294]"],
+.dark .onboarding-theme [class~="text-[#6b7a9c]"],
+.dark .onboarding-theme [class~="text-[#71809b]"],
+.dark .onboarding-theme [class~="text-[#8a97b0]"] { color: rgb(var(--onboarding-secondary)) !important; }
+
+.dark .onboarding-theme [class~="border-[#c8d3e6]"],
+.dark .onboarding-theme [class~="border-[#cbd8ef]"],
+.dark .onboarding-theme [class~="border-[#cfd8e8]"],
+.dark .onboarding-theme [class~="border-[#d6ddea]"],
+.dark .onboarding-theme [class~="border-[#d9e1f0]"],
+.dark .onboarding-theme [class~="border-[#dce5f4]"],
+.dark .onboarding-theme [class~="border-[#e1e7f0]"],
+.dark .onboarding-theme [class~="border-[#e2e8f0]"],
+.dark .onboarding-theme [class~="border-[#e2e8f1]"],
+.dark .onboarding-theme [class~="border-[#e6ebf3]"] { border-color: rgb(var(--onboarding-border)) !important; }
+
+.dark .onboarding-theme [class~="bg-[#eef4ff]"],
+.dark .onboarding-theme [class~="bg-[#eaf1ff]"],
+.dark .onboarding-theme [class~="bg-[#f4f7ff]"],
+.dark .onboarding-theme [class~="bg-[#f5f8ff]"],
+.dark .onboarding-theme [class~="bg-[#f0f3f9]"],
+.dark .onboarding-theme [class~="bg-[#f1f4f8]"] { background-color: rgb(var(--surface-subtle)) !important; }
+.dark .onboarding-theme [class~="bg-[#f1eaff]"],
+.dark .onboarding-theme [class~="bg-[#e6ddff]"] { background-color: rgb(var(--violet-soft)) !important; }
+.dark .onboarding-theme [class~="bg-[#e7f8f0]"],
+.dark .onboarding-theme [class~="bg-[#ecfbf3]"],
+.dark .onboarding-theme [class~="bg-[#e8f8ef]"] { background-color: rgb(var(--success-soft)) !important; }
+.dark .onboarding-theme [class~="text-[#7042e9]"],
+.dark .onboarding-theme [class~="text-[#814ef0]"],
+.dark .onboarding-theme [class~="text-[#8a67ee]"] { color: rgb(var(--violet)) !important; }
+.dark .onboarding-theme [class~="text-[#19a36d]"],
+.dark .onboarding-theme [class~="text-[#31a467]"],
+.dark .onboarding-theme [class~="text-[#32ae70]"],
+.dark .onboarding-theme [class~="text-[#32a86d]"] { color: rgb(var(--success)) !important; }
+
+.dark .onboarding-theme [class~="hover:text-[#101a43]"]:hover { color: rgb(var(--foreground)) !important; }
+
+.onboarding-brand-panel {
+  background: linear-gradient(
+    145deg,
+    rgb(var(--onboarding-brand-start)) 0%,
+    rgb(var(--onboarding-brand-mid)) 55%,
+    rgb(var(--onboarding-brand-end)) 100%
+  );
+}
+
+.onboarding-theme {
+  --onboarding-brand-start: 255 255 255;
+  --onboarding-brand-mid: 247 250 255;
+  --onboarding-brand-end: 231 239 255;
+}
+
+.dark .onboarding-theme {
+  --onboarding-brand-start: 18 26 41;
+  --onboarding-brand-mid: 20 31 56;
+  --onboarding-brand-end: 29 42 78;
+}
+
 /* Colored semantic-soft compatibility for legacy screenshot-matched utilities. */
 .dark .bg-blue-50 {
   background-color: rgb(var(--brand-soft)) !important;

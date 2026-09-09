@@ -1,0 +1,197 @@
+import { request } from "./client";
+
+export interface RunRecord {
+  run_id: string;
+  source: string;
+  event_type: string;
+  org_id: string;
+  status: string;
+  error: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface RunStep {
+  seq: number;
+  kind: string;
+  name: string;
+  status: string;
+  duration_ms: number | null;
+  detail: Record<string, unknown> | null;
+}
+
+export interface ReviewSummary {
+  id: string;
+  org_id: string;
+  run_id: string;
+  workflow: string;
+  tool_name: string;
+  tool_args: Record<string, unknown>;
+  action_description: string | null;
+  status: string;
+  decision: string | null;
+  decision_comment: string | null;
+  decided_at: string | null;
+  created_at: string | null;
+  expires_at: string | null;
+  interrupt_id: string | null;
+  // Task 10 structured fields (optional until backend deployed)
+  detail?: Record<string, unknown> | null;
+  pr?: {
+    title?: string;
+    trigger_label?: string;
+    actor?: string;
+    owner?: string;
+    repo?: string;
+    issue_number?: number;
+  } | null;
+}
+
+export interface ModelPerformance {
+  model_name: string;
+  task_type: string;
+  sample_count: number | null;
+  success_rate: number | null;
+  p50_latency_ms: number | null;
+  p95_latency_ms: number | null;
+  quality_ema: number | null;
+}
+
+export interface MetricsSnapshot {
+  counters: Record<string, number>;
+  gauges: Record<string, number>;
+  timings: Record<string, Record<string, number>>;
+}
+
+export async function listRuns(
+  status?: string,
+  limit = 50,
+): Promise<{ items: RunRecord[] }> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (status) params.set("status", status);
+  return request(`/runs?${params.toString()}`);
+}
+
+export async function getRun(runId: string): Promise<{ run: RunRecord }> {
+  return request(`/runs/${encodeURIComponent(runId)}`);
+}
+
+export async function getRunSteps(
+  runId: string,
+): Promise<{ items: RunStep[] }> {
+  return request(`/runs/${encodeURIComponent(runId)}/steps`);
+}
+
+export async function listReviews(
+  status?: string,
+  limit = 100,
+): Promise<{ items: ReviewSummary[] }> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (status) params.set("status", status);
+  return request(`/reviews?${params.toString()}`);
+}
+
+export async function getReview(reviewId: string): Promise<{ review: ReviewSummary }> {
+  return request(`/reviews/${encodeURIComponent(reviewId)}`);
+}
+
+// Run-id alias — uses Task 10's /by-run endpoint when available, falls back to list filter.
+export async function getReviewByRunId(runId: string): Promise<{ review: ReviewSummary }> {
+  try {
+    return await request<{ review: ReviewSummary }>(`/reviews/by-run/${encodeURIComponent(runId)}`);
+  } catch (err) {
+    // Fallback until Task 10 alias is deployed: scan the pending list
+    const { items } = await listReviews(undefined, 200);
+    const found = (items as ReviewSummary[]).find((r) => r.run_id === runId);
+    if (!found) throw err;
+    return { review: found };
+  }
+}
+
+export async function getMetricsSnapshot(): Promise<MetricsSnapshot> {
+  return request("/metrics/snapshot");
+}
+
+export async function getRoutingDecisions(
+  limit = 100,
+): Promise<{ items: Record<string, unknown>[] }> {
+  return request(`/observability/routing-decisions?limit=${limit}`);
+}
+
+export async function getModelPerformance(): Promise<{
+  items: ModelPerformance[];
+}> {
+  return request("/observability/model-performance");
+}
+
+export type JobStatus = {
+  job_id: string;
+  task_name: string;
+  status: "queued" | "started" | "finished" | "failed";
+  enqueued_at: string;
+  started_at?: string;
+  completed_at?: string;
+  result?: unknown;
+  error?: string;
+  attempts: number;
+};
+
+export async function getActiveJobs(): Promise<{
+  items: { job_id: string }[];
+}> {
+  return request("/jobs");
+}
+
+export async function getJobStatus(jobId: string): Promise<JobStatus> {
+  return request<JobStatus>(`/jobs/${jobId}`);
+}
+
+export async function listActiveJobs(): Promise<JobStatus[]> {
+  const res = await request<{ items: JobStatus[] }>("/jobs");
+  return res.items;
+}
+
+export interface WorkflowListItem {
+  run_id: string;
+  title: string;
+  target_doc: string | null;
+  trigger_label: string;
+  status: string;
+  current_stage: string | null;
+  stages: string[];
+  current_stage_color: string;
+  time: string;
+}
+
+export async function listWorkflows(): Promise<WorkflowListItem[]> {
+  const res = await request<{ items: WorkflowListItem[] }>("/workflows");
+  return res.items;
+}
+
+export interface EvaluationItem {
+  id: string;
+  org_id: string;
+  evaluation_type: string | null;
+  target_id: string | null;
+  score: number | null;
+  status: string;
+  metrics: Record<string, unknown>;
+  failures: Record<string, unknown>[];
+  started_at: string | null;
+  completed_at: string | null;
+  target_type?: string | null;
+  trace_id?: string | null;
+}
+
+export async function listEvaluations(
+  limit = 50,
+): Promise<{ items: EvaluationItem[] }> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  return request(`/evaluations?${params.toString()}`);
+}
+
+export async function getEvaluation(
+  evaluationId: string,
+): Promise<{ item: EvaluationItem }> {
+  return request(`/evaluations/${encodeURIComponent(evaluationId)}`);
+}
