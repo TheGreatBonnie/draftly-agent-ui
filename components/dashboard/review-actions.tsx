@@ -12,11 +12,12 @@ import {
 
 export interface ReviewActionsProps {
   runId: string;
+  reviewId: string;
   status: string;
   onDecisionSaved?: (result: ReviewDecisionResult) => void;
 }
 
-export default function ReviewActions({ runId, status, onDecisionSaved }: ReviewActionsProps) {
+export default function ReviewActions({ runId, reviewId, status, onDecisionSaved }: ReviewActionsProps) {
   const [comment, setComment] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export default function ReviewActions({ runId, status, onDecisionSaved }: Review
     setError(null);
     const decision = buildReviewDecision(runId, kind, comment);
     try {
-      const result = await decideReview(decision.runId, decision.decision, decision.comment);
+      const result = await decideReview(decision.runId, reviewId, decision.decision, decision.comment);
       setComment("");
       onDecisionSaved?.(result);
     } catch (reason) {

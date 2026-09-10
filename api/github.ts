@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { request } from "./client.ts";
 import type { GitHubInstallation, GitHubInstallUrl } from "./types";
 
 /** Fetch the GitHub App install URL. When returnTo is provided, the backend
@@ -39,15 +39,17 @@ export type ReviewDecision = "approve" | "request_changes" | "reject";
  *  identity over any client-supplied reviewer id. */
 export async function decideReview(
   runId: string,
+  reviewId: string,
   decision: ReviewDecision,
-  comment?: string,
+  comment = "",
 ): Promise<ReviewDecisionResult> {
   return request(`/github/review/${encodeURIComponent(runId)}`, {
     method: "POST",
     body: JSON.stringify({
-      decision,
+      review_id: reviewId,
       reviewer_id: "",
-      comment: comment ?? null,
+      decision,
+      comment,
     }),
   });
 }
