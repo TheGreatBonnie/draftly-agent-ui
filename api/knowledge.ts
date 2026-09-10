@@ -140,8 +140,10 @@ export async function searchKnowledge(
   q: string,
   limit = 20,
   signal?: AbortSignal,
+  status?: KnowledgeStatus,
 ): Promise<{ query: string; items: KnowledgeListItem[]; total: number }> {
   const params = new URLSearchParams({ q, limit: String(limit) });
+  if (status) params.set("status", status);
   return request(`/knowledge/search?${params.toString()}`, { signal });
 }
 

@@ -17,7 +17,7 @@ test("Knowledge API wrappers preserve bounded query parameters and encoded ids",
   const controller = new AbortController();
   try {
     await listKnowledge({ status: "verified", limit: 50, cursor: "opaque cursor", signal: controller.signal });
-    await searchKnowledge("oauth tokens", 20, controller.signal);
+    await searchKnowledge("oauth tokens", 20, controller.signal, "verified");
     await getKnowledgeDetail("item/one", controller.signal);
   } finally {
     globalThis.fetch = originalFetch;
@@ -28,7 +28,7 @@ test("Knowledge API wrappers preserve bounded query parameters and encoded ids",
   assert.equal(listUrl.searchParams.get("status"), "verified");
   assert.equal(listUrl.searchParams.get("limit"), "50");
   assert.equal(listUrl.searchParams.get("cursor"), "opaque cursor");
-  assert.match(calls[1].url, /\/api\/knowledge\/search\?q=oauth\+tokens&limit=20$/);
+  assert.match(calls[1].url, /\/api\/knowledge\/search\?q=oauth\+tokens&limit=20&status=verified$/);
   assert.equal(calls[2].url, "/api/knowledge/item%2Fone");
   assert.equal(calls[0].signal, controller.signal);
 });

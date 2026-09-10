@@ -44,7 +44,7 @@ export function useKnowledge({ status, query = "", cursor }: UseKnowledgeOptions
     setLoading(true);
     setError(null);
     const itemsRequest = debouncedQuery
-      ? searchKnowledge(debouncedQuery, 50, controller.signal).then((result) => ({
+      ? searchKnowledge(debouncedQuery, 50, controller.signal, status).then((result) => ({
           items: result.items,
           total: result.total,
           next_cursor: null,
