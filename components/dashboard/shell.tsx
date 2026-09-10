@@ -437,7 +437,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                   Files,
                   "OAuth 2.0 Integration",
                   "Documentation",
-                  "/documentation/oauth-2-0-integration",
+                  "/documentation",
                 ],
                 [
                   FileCheck2,

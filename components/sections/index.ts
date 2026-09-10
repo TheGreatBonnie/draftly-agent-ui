@@ -1,5 +1,5 @@
+export { DocumentationSubpage } from "./documentation/documentation-pages";
 export {
-  DocumentationSubpage,
   EvaluationsSubpage,
   WorkflowsSubpage,
 } from "../dashboard/section-subpage";
