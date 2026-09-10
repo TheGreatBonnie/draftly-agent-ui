@@ -453,9 +453,9 @@ export default function Shell({ children }: { children: ReactNode }) {
                 ],
                 [
                   Bot,
-                  "Documentation Agent",
+                  "Agents",
                   "Agent",
-                  "/agents/documentation-agent",
+                  "/agents",
                 ],
               ].map(([Icon, label, type, href]) => (
                 <Link

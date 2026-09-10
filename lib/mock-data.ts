@@ -238,18 +238,6 @@ export const workflows = [
   ["API Reference Sync","Keep API reference in sync with code changes.","Code changes","3 days ago","Success",true],
 ];
 
-export const agents = [
-  ["Documentation Agent","Generates, updates, and maintains accurate documentation from code changes, releases, and discussions.","documentation, content-generation, markdown","Active","6 skills","12 min ago"],
-  ["Research Agent","Finds relevant context from repositories, discussions, and external sources.","research, context-gathering, web-search","Active","5 skills","18 min ago"],
-  ["Documentation Reviewer","Reviews generated documentation for accuracy, completeness, and quality.","review, quality, evaluation","Active","4 skills","25 min ago"],
-  ["GitHub Intelligence Agent","Monitors PRs, issues, and releases to detect documentation opportunities.","github, code-analysis, event-processing","Active","5 skills","8 min ago"],
-  ["Support Agent","Answers developer questions from Slack, Discord, and GitHub issues using your knowledge base.","support, qa, conversation","Active","6 skills","15 min ago"],
-  ["Memory Curator Agent","Manages long-term memory, knowledge organization, and context enrichment.","memory, knowledge-graph, embeddings","Active","5 skills","32 min ago"],
-  ["Evaluation Agent","Runs evaluations using Strands Eval SDK and tracks quality metrics.","evaluation, testing, metrics","Active","4 skills","20 min ago"],
-  ["Delivery Agent","Publishes approved documentation changes and creates PRs or commits.","deployment, publishing, automation","Idle","4 skills","3 hours ago"],
-  ["Scheduler Agent","Handles scheduled jobs, periodic audits, and recurring documentation tasks.","scheduling, automation, maintenance","Idle","3 skills","6 hours ago"],
-];
-
 export const integrations = ["GitHub","Slack","Discord","Notion","GitLab","Jira","Confluence","Linear","Google Drive","Microsoft Teams","SharePoint","Zendesk","Intercom","Sentry","Datadog","Custom Webhook"];
 
 export const evaluationRuns = [

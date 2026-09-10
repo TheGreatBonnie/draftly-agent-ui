@@ -35,9 +35,8 @@ export const sectionTabs = {
   ],
   agents: [
     { label: "All agents", href: "/agents" },
-    { label: "Active", href: "/agents/active", count: 8 },
-    { label: "Idle", href: "/agents/idle", count: 2 },
-    { label: "Templates", href: "/agents/templates" },
+    { label: "Active", href: "/agents/active" },
+    { label: "Idle", href: "/agents/idle" },
   ],
 } as const;
 

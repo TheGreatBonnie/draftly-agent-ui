@@ -1,62 +1,114 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { listRuns } from "@/api/runs";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { listAgentRuns } from "@/api/agents";
+import { getRunSteps } from "@/api/runs";
 import { useWorkflowEvents } from "@/hooks/use-workflow-events";
-import type { AgentRun, RunSummary } from "@/api/types";
+import type { RunStepSummary, RunSummary } from "@/api/types";
 
-export function useAgentRuns() {
+function eventToStep(event: {
+  type: string;
+  seq: number;
+  node_id?: string | null;
+  payload: Record<string, unknown>;
+}): RunStepSummary {
+  const isTool = event.type === "tool_progress";
+  return {
+    seq: event.seq,
+    kind: isTool ? "tool" : "node",
+    name: String(event.payload.name ?? event.node_id ?? event.type),
+    status: String(event.payload.status ?? (event.type === "node_stop" ? "completed" : "running")),
+    duration_ms: typeof event.payload.duration_ms === "number" ? event.payload.duration_ms : null,
+    detail: event.payload,
+    agent_id: typeof event.payload.agent_id === "string" ? event.payload.agent_id : null,
+    node_id: event.node_id ?? null,
+    surface: typeof event.payload.surface === "string" ? event.payload.surface : "",
+  };
+}
+
+export function useAgentRuns(agentId?: string) {
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [steps, setSteps] = useState<RunStepSummary[]>([]);
+  const [loading, setLoading] = useState(Boolean(agentId));
   const [error, setError] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [requestVersion, setRequestVersion] = useState(0);
+  const retry = useCallback(() => setRequestVersion((value) => value + 1), []);
 
   useEffect(() => {
-    let cancelled = false;
-    listRuns()
-      .then((rows) => {
-        if (!cancelled) {
-          setRuns(rows);
-          setLoaded(true);
+    if (!agentId) {
+      setRuns([]);
+      setSelectedId(null);
+      setLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+    listAgentRuns(agentId)
+      .then((response) => {
+        if (!controller.signal.aborted) {
+          setRuns(response.items);
+          setSelectedId((current) => current ?? response.items[0]?.run_id ?? null);
+          setLoading(false);
         }
       })
-      .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const connectRun = useCallback(
-    (runId: string | null) => setSelectedId(runId),
-    [],
-  );
-
-  const selectedRun = runs.find((r) => r.run_id === selectedId) ?? null;
-  const { events: frames, reason } = useWorkflowEvents(selectedId);
-
-  // A stream-ticket 404 means the run id is genuinely unknown (stale or a
-  // non-run value like an agent role). Nothing can stream for it, so derive
-  // the detail away instead of showing a misleading empty run.
-  const streamInvalid = reason === "unknown-run";
-
-  const detail: AgentRun | null =
-    selectedId && !streamInvalid
-      ? {
-          run_id: selectedId,
-          surface: selectedRun?.surface ?? "",
-          status: selectedRun?.status ?? "running",
-          steps: frames.map((f) => ({
-            seq: f.seq,
-            kind: f.type === "tool_progress" ? "tool" : "node",
-            name: (f.payload?.name as string) ?? f.node_id ?? f.type,
-            status: (f.payload?.status as string) ?? (f.type === "node_stop" ? "completed" : "running"),
-            duration_ms: (f.payload?.duration_ms as number) ?? null,
-            detail: f.payload,
-          })),
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted) {
+          setError(reason instanceof Error ? reason.message : "Unable to load agent runs");
+          setLoading(false);
         }
-      : null;
+      });
+    return () => controller.abort();
+  }, [agentId, requestVersion]);
 
-  return { runs, loaded, error, selectedId, selectedRun, detail, connectRun };
+  const selectedRun = useMemo(
+    () => runs.find((run) => run.run_id === selectedId) ?? null,
+    [runs, selectedId],
+  );
+  const stream = useWorkflowEvents(selectedId);
+
+  useEffect(() => {
+    if (!selectedId) {
+      setSteps([]);
+      return;
+    }
+    const controller = new AbortController();
+    getRunSteps(selectedId)
+      .then((items) => {
+        if (!controller.signal.aborted) {
+          setSteps((current) => {
+            const bySeq = new Map(items.map((step) => [step.seq, step]));
+            for (const step of current) bySeq.set(step.seq, step);
+            return [...bySeq.values()].sort((a, b) => a.seq - b.seq);
+          });
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setSteps([]);
+      });
+    return () => controller.abort();
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (stream.events.length === 0) return;
+    setSteps((current) => {
+      const bySeq = new Map(current.map((step) => [step.seq, step]));
+      for (const event of stream.events) bySeq.set(event.seq, eventToStep(event));
+      return [...bySeq.values()].sort((a, b) => a.seq - b.seq);
+    });
+  }, [stream.events]);
+
+  return {
+    runs,
+    selectedId,
+    selectedRun,
+    steps,
+    loading,
+    error,
+    retry,
+    selectRun: setSelectedId,
+    streamStatus: stream.status,
+    streamReason: stream.reason,
+  };
 }
