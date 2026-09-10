@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -55,20 +57,7 @@ const docRows = [
   ],
   ["User management", "Authly", "Guide", "Outdated", "5 days ago"],
 ];
-const evalRuns = [
-  [
-    "run_01H8Z3",
-    "PR #142 – OAuth authentication",
-    "documentation",
-    12,
-    11,
-    1,
-    92,
-  ],
-  ["run_01H7Y1", "Release v1.2.0 notes", "release_notes", 10, 9, 1, 88],
-  ["run_01H6K9", "Redis caching guide", "documentation", 14, 14, 0, 96],
-  ["run_01H5Q8", "Support response evaluation", "support", 16, 13, 3, 84],
-];
+const legacyRuns: Array<[string, string, string, number, number, number, number]> = [];
 
 export function EvaluationsSubpage({ kind }: { kind: string }) {
   const { runs, summary, catalog } = useEvaluations(14);
@@ -85,7 +74,7 @@ export function EvaluationsSubpage({ kind }: { kind: string }) {
   const content =
     kind === "runs" ? (
       <div className="space-y-3">
-        {evalRuns.map((r) => (
+        {legacyRuns.map((r) => (
           <Link href={`/evaluations/runs/${r[0]}`} key={String(r[0])}>
             <Card className="mb-3 p-4">
               <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
@@ -206,7 +195,7 @@ export function EvaluationsSubpage({ kind }: { kind: string }) {
     <>
       <PageHeader
         title={title}
-        subtitle="Inspect quality, failures, and evaluation assets using mock Strands Eval SDK data."
+        subtitle="Inspect quality, failures, and evaluation assets from the backend."
       />
       <SectionTabs section="evaluations" />
       <div className="mt-4">{content}</div>

@@ -240,17 +240,6 @@ export const workflows = [
 
 export const integrations = ["GitHub","Slack","Discord","Notion","GitLab","Jira","Confluence","Linear","Google Drive","Microsoft Teams","SharePoint","Zendesk","Intercom","Sentry","Datadog","Custom Webhook"];
 
-export const evaluationRuns = [
-  {id:"run_01H8Z3",name:"PR #142 – OAuth authentication",dataset:"documentation",cases:12,passed:11,failed:1,score:92,status:"Completed",started:"Sep 5, 2026, 10:24 AM",duration:"2m 14s"},
-  {id:"run_01H7Y1",name:"Release v1.2.0 notes",dataset:"release_notes",cases:10,passed:9,failed:1,score:88,status:"Completed",started:"Sep 4, 2026, 3:12 PM",duration:"1m 58s"},
-  {id:"run_01H6K9",name:"Redis caching guide",dataset:"documentation",cases:14,passed:14,failed:0,score:96,status:"Completed",started:"Sep 4, 2026, 9:06 AM",duration:"2m 41s"},
-];
-export const evalCases = [
-  {id:"oauth-expected-contains",case:"oauth-authentication-add",metric:"Expected content",score:100,threshold:60,status:"Passed",reason:"All expected OAuth and refresh-token concepts are present."},
-  {id:"oauth-tools",case:"oauth-authentication-add",metric:"Expected tools",score:100,threshold:100,status:"Passed",reason:"Repository and documentation retrieval tools were used."},
-  {id:"oauth-grounding",case:"oauth-authentication-add",metric:"Groundedness",score:71,threshold:80,status:"Failed",reason:"One token rotation claim is not directly supported by retrieved source context."},
-  {id:"oauth-quality",case:"oauth-authentication-add",metric:"Documentation quality",score:96,threshold:80,status:"Passed",reason:"The output is readable, structured, and developer-focused."},
-];
 export const activityItems = [
  {id:"evt-pr-142",title:"New pull request opened",detail:"PR #142 Add OAuth 2.0 support",source:"GitHub",type:"Repository",time:"10:24 AM",icon:"github"},
  {id:"evt-doc-oauth",title:"Documentation updated",detail:"Updated authentication guide with OAuth 2.0 examples",source:"Documentation",type:"Document change",time:"10:18 AM",icon:"file"},
