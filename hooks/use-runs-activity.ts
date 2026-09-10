@@ -1,7 +1,7 @@
 "use client";
 
-import useSWR from "swr";
 import { getRunSteps, listRuns, type RunRecord } from "../api/observability";
+import { useLiveRefresh } from "./use-live-refresh";
 
 export interface AgentActivityItem {
   name: string;
@@ -26,10 +26,7 @@ export function useRunsActivity(): {
   items: AgentActivityItem[] | null;
   loading: boolean;
 } {
-  const { data, isLoading } = useSWR("dashboard:run-steps", fetcher, {
-    refreshInterval: 20_000,
-    onErrorRetry: () => {},
-  });
+  const { data, isLoading } = useLiveRefresh(fetcher, ["workflow:changed"], 20_000);
 
   return { items: data ?? null, loading: isLoading };
 }

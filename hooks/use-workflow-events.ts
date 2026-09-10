@@ -50,7 +50,7 @@ const MAX_RECONNECT_MS = 15_000;
 
 export function useWorkflowEvents(
   run_id: string | null,
-  options?: { ticket?: string; nonce?: number },
+  options?: { ticket?: string; nonce?: number; basePath?: string },
 ) {
   const [status, setStatus] = useState<StreamStatus>("idle");
   const [events, setEvents] = useState<StreamEvent[]>([]);
@@ -121,6 +121,7 @@ export function useWorkflowEvents(
     let reconnectAttempts = 0;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
     let source: EventSource | null = null;
+    const streamBase = options?.basePath ?? "/workflows";
     doneRef.current = false;
     lastSeqRef.current = 0;
     seenSeqRef.current = new Set<number>();
@@ -166,7 +167,7 @@ export function useWorkflowEvents(
       // Always fetch a new ticket on every connect attempt (tickets are single-use)
       try {
         const { ticket: fetched } = await request<{ ticket: string }>(
-          `/workflows/${encodeURIComponent(run_id)}/stream-ticket`,
+          `${streamBase}/${encodeURIComponent(run_id)}/stream-ticket`,
           { method: "POST" },
         );
         ticket = fetched;
@@ -195,10 +196,10 @@ export function useWorkflowEvents(
         : "";
       console.log("[SSE] creating EventSource", {
         run_id,
-        url: `${apiBase}/api/workflows/${encodeURIComponent(run_id)}/events?ticket=...${lastId ? "&Last-Event-ID=..." : ""}`,
+        url: `${apiBase}/api${streamBase}/${encodeURIComponent(run_id)}/events?ticket=...${lastId ? "&Last-Event-ID=..." : ""}`,
       });
       const nextSource = new EventSource(
-        `${apiBase}/api/workflows/${encodeURIComponent(run_id)}/events?ticket=${encodeURIComponent(ticket)}${lastId}`,
+        `${apiBase}/api${streamBase}/${encodeURIComponent(run_id)}/events?ticket=${encodeURIComponent(ticket)}${lastId}`,
       );
       source = nextSource;
       sourceRef.current = nextSource;
