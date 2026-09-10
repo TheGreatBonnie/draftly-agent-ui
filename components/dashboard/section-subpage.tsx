@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   AlertTriangle,
   Boxes,
@@ -25,6 +26,8 @@ import {
 } from "@/components/dashboard/ui";
 import { SectionTabs } from "@/components/dashboard/section-tabs";
 import { workflows } from "@/lib/mock-data";
+import { useEvaluations, useEvaluationRun } from "@/hooks/use-evaluations";
+import { evaluationScore, evaluationStatusLabel, evaluationTone } from "@/lib/evaluations";
 
 type Section =
   | "reviews"
@@ -68,6 +71,9 @@ const evalRuns = [
 ];
 
 export function EvaluationsSubpage({ kind }: { kind: string }) {
+  const { runs, summary, catalog } = useEvaluations(14);
+  const selectedRun = useEvaluationRun(runs.data?.items[0]?.run_id ?? "");
+  return <DynamicEvaluationsSubpage kind={kind} runs={runs.data?.items ?? []} cases={selectedRun.data?.cases ?? []} datasets={catalog.data?.datasets ?? []} evaluators={catalog.data?.evaluators ?? []} trend={summary.data?.trend ?? []} loading={runs.isLoading || catalog.isLoading || summary.isLoading} error={runs.error || catalog.error || summary.error} />;
   const title =
     {
       runs: "Evaluation runs",
@@ -207,6 +213,19 @@ export function EvaluationsSubpage({ kind }: { kind: string }) {
     </>
   );
 }
+
+function DynamicEvaluationsSubpage({ kind, runs, cases, datasets, evaluators, trend, loading, error }: { kind: string; runs: Array<{ run_id: string; name: string; evaluation_type: string; cases: number; score: number | null; status: "queued" | "running" | "passed" | "failed" | "cancelled" | "skipped" }>; cases: Array<{ id: string; case_id: string; dataset: string; metric: string; score: number | null; passed: boolean }>; datasets: Array<{ name: string; description: string; surface: string; case_count: number; version: string | null }>; evaluators: Array<{ key: string; display_name: string; description: string; threshold: number | null; version: string | null; enabled: boolean }>; trend: Array<{ date: string; average_score: number }>; loading: boolean; error: string | null }) {
+  const title = ({ runs: "Evaluation runs", "test-cases": "Test cases", datasets: "Datasets", evaluators: "Evaluators", trends: "Evaluation trends" } as Record<string, string>)[kind] ?? "Evaluations";
+  let content: ReactNode = null;
+  if (kind === "runs") content = runs.length === 0 ? <EmptyEvaluation text="No evaluation runs have been recorded." /> : <div className="space-y-3">{runs.map((run) => <Link href={`/evaluations/runs/${encodeURIComponent(run.run_id)}`} key={run.run_id}><Card className="p-4"><div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]"><div><div className="font-semibold">{run.name}</div><div className="text-xs text-foreground-muted">{run.run_id} · {run.evaluation_type}</div></div><span className="text-sm">{run.cases} cases</span><Badge tone={evaluationTone(run.status)}>{evaluationStatusLabel(run.status)}</Badge><b>{evaluationScore(run.score)}</b></div></Card></Link>)}</div>;
+  if (kind === "test-cases") content = cases.length === 0 ? <EmptyEvaluation text="No case results are available." /> : <div className="grid gap-3 md:grid-cols-2">{cases.map((item) => <Link href={`/evaluations/test-cases/${encodeURIComponent(item.id)}`} key={item.id}><Card className="p-4"><div className="flex items-start justify-between"><IconTile tone={item.passed ? "green" : "rose"}><CheckCircle2 className="h-5 w-5" /></IconTile><Badge tone={item.passed ? "green" : "rose"}>{evaluationScore(item.score)}</Badge></div><h3 className="mt-4 font-semibold">{item.case_id}</h3><p className="mt-1 text-xs text-foreground-muted">{item.dataset} · {item.metric}</p></Card></Link>)}</div>;
+  if (kind === "datasets") content = datasets.length === 0 ? <EmptyEvaluation text="No datasets are available." /> : <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{datasets.map((dataset) => <Card key={dataset.name} className="p-4"><IconTile><Boxes className="h-5 w-5" /></IconTile><h3 className="mt-4 font-semibold">{dataset.name}</h3><p className="text-xs text-foreground-muted">{dataset.case_count} test cases · {dataset.surface}</p><p className="mt-3 text-xs text-foreground-muted">{dataset.description || "No description recorded."} · v{dataset.version || "—"}</p></Card>)}</div>;
+  if (kind === "evaluators") content = evaluators.length === 0 ? <EmptyEvaluation text="No evaluators are available." /> : <div className="grid gap-3 md:grid-cols-2">{evaluators.map((evaluator) => <Card className="p-4" key={evaluator.key}><div className="flex gap-3"><IconTile tone="blue"><Sparkles className="h-5 w-5" /></IconTile><div><h3 className="font-semibold">{evaluator.display_name}</h3><p className="mt-1 text-xs text-foreground-muted">{evaluator.key} · {evaluator.enabled ? "active" : "disabled"} · threshold {evaluationScore(evaluator.threshold)} · v{evaluator.version || "—"}</p><p className="mt-2 text-xs text-foreground-muted">{evaluator.description}</p></div></div></Card>)}</div>;
+  if (kind === "trends") content = trend.length === 0 ? <EmptyEvaluation text="No completed runs are available for this trend." /> : <Card className="p-5"><h3 className="font-semibold">Persisted score trend</h3><div className="mt-6 flex h-52 items-end gap-2">{trend.map((point) => <div key={point.date} className="flex-1 rounded-t bg-brand/20" style={{ height: `${point.average_score}%` }} title={`${point.date}: ${evaluationScore(point.average_score)}`}><div className="h-2 rounded-t bg-brand" /></div>)}</div></Card>;
+  return <><PageHeader title={title} subtitle="Inspect persisted evaluation data and evaluator assets." /><SectionTabs section="evaluations" /><div className="mt-4">{error ? <div role="alert" className="rounded-md border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div> : loading ? <div role="status" className="p-5 text-sm text-foreground-muted">Loading evaluation data…</div> : content}</div></>;
+}
+
+function EmptyEvaluation({ text }: { text: string }) { return <div role="status" className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-foreground-muted">{text}</div>; }
 
 export function DocumentationSubpage({ kind }: { kind: string }) {
   const title =
