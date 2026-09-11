@@ -252,13 +252,6 @@ export const integrationDetails: Record<string,{name:string;description:string;s
  discord:{name:"Discord",description:"Monitor community support and developer conversations.",status:"Connected",icon:"message",scopes:["#help","#developers"],events:["New messages","Threads"],lastSync:"1 hour ago"},
  notion:{name:"Notion",description:"Sync product documentation, wikis, and knowledge bases.",status:"Connected",icon:"file",scopes:["Product Docs","Engineering Wiki"],events:["Page changes","New pages"],lastSync:"3 hours ago"},
 };
-export const knowledgeTopics = [
- {name:"Authentication",documents:58,concepts:162,discussions:23,changes:12},
- {name:"API Reference",documents:42,concepts:118,discussions:14,changes:18},
- {name:"Deployment",documents:36,concepts:84,discussions:11,changes:9},
- {name:"User Management",documents:28,concepts:72,discussions:8,changes:6},
- {name:"SDKs",documents:24,concepts:66,discussions:16,changes:13},
-];
 export const workflowSteps = [
  {name:"GitHub event received",agent:"GitHub Intelligence Agent",status:"Completed",duration:"2s"},
  {name:"Repository context loaded",agent:"Research Agent",status:"Completed",duration:"5s"},

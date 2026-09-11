@@ -1,6 +1,6 @@
 # Draftly UI — Next.js + TypeScript + Tailwind CSS
 
-High-fidelity frontend for Draftly, based on the supplied UI designs. Most product data remains local mock data, while the review workspace and agents observability pages read from the Draftly backend.
+High-fidelity frontend for Draftly, based on the supplied UI designs. The review workspace, agents observability, and Knowledge pages read organization-scoped data from the Draftly backend; other prototype surfaces may still use local mock data.
 
 ## Review workspace integration
 
@@ -9,6 +9,12 @@ The review routes (`/reviews`, `/reviews/[id]`, and their status subroutes) requ
 ## Agents observability integration
 
 `/agents`, `/agents/active`, `/agents/idle`, and `/agents/[id]` use the authenticated `/api/agents` catalog and organization-scoped telemetry endpoints. The catalog is code-defined by the backend; configurable agent creation, editing, and deletion are not exposed. Agent detail hydrates historical steps from `/api/runs/{run_id}/steps` and subscribes to the existing Redis/SSE workflow stream for a selected run. The backend and Redis event stream must be reachable through the same authenticated API rewrite, and the Clerk token must contain the active organization.
+
+## Knowledge integration
+
+`/knowledge` and its subroutes use the authenticated `/api/knowledge` read model. The overview loads organization-scoped counts, recent items, provenance summaries, graph nodes, and topic aggregates. Documents support bounded semantic search; `/knowledge/item/[id]` displays the item detail, sources, relations, and feedback. The backend and API rewrite must be reachable, and the Clerk token must contain the active organization.
+
+Knowledge source cards represent persisted provenance evidence, not whether an integration is currently connected. Add/import source actions remain intentionally unavailable until the corresponding backend mutation and integration-health contracts are implemented.
 
 ## Run
 
@@ -46,7 +52,7 @@ Open `http://localhost:3000`.
 - Evaluation run and test-case detail pages using Strands Eval SDK-oriented mock data
 - Activity event detail pages
 - Integration configuration and add-integration flow
-- Knowledge documents, sources, graph, topics, and embeddings pages
+- Knowledge documents, sources, graph, topics, and embedding-coverage pages backed by live organization-scoped reads
 - Settings subpages for organization, model routing, GitHub, notifications, security, billing, advanced configuration, and audit logs
 - Documentation detail editor with preview, evidence, and AI suggestions
 - Review action confirmation/feedback dialogs backed by the Draftly API
@@ -56,7 +62,7 @@ Open `http://localhost:3000`.
 
 ## Notes
 
-Non-review prototype routes may still use local mock data. The review routes are integrated with the authenticated Draftly API and require the backend setup described above.
+Non-review prototype routes may still use local mock data. The review, agents, and Knowledge routes are integrated with the authenticated Draftly API and require the backend setup described above.
 
 
 ## Dark mode and semantic design tokens
