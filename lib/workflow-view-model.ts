@@ -13,9 +13,19 @@ export function statusTone(status: string): "blue" | "green" | "amber" | "rose" 
   if (["completed", "active", "success", "delivered"].includes(status)) return "green";
   if (["failed", "rejected"].includes(status)) return "rose";
   if (["pending_review", "paused", "running"].includes(status)) return "amber";
+  if (status === "pending_intervention") return "rose";
   if (["draft", "queued"].includes(status)) return "slate";
   if (["cancelled", "skipped", "archived"].includes(status)) return "violet";
   return "blue";
+}
+
+export function interventionStatusLabel(status: string): string {
+  if (status === "pending") return "Awaiting decision";
+  if (status === "approved") return "Approved";
+  if (status === "denied") return "Denied";
+  if (status === "guided") return "Guidance sent";
+  if (status === "expired") return "Expired";
+  return label(status);
 }
 
 export function filterWorkflows(items: WorkflowDefinition[], search: string): WorkflowDefinition[] {

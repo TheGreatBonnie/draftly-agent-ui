@@ -13,6 +13,7 @@ export interface OverviewSnapshot {
   };
   attention: {
     pending_reviews: number;
+    pending_interventions: number;
     high_risk_reviews: number;
     failed_evaluations: number;
     integration_issues: number;

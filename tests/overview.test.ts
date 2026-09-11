@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import type { OverviewSnapshot } from "../api/overview.ts";
 import { formatActivityDate, formatRelativeTime, formatScore, formatTrend, rangeToDays, statusTone } from "../lib/overview.ts";
 
 test("maps dashboard chart ranges to backend day counts", () => {
@@ -45,4 +46,17 @@ test("maps backend statuses to semantic card tones", () => {
   assert.equal(statusTone("queued"), "amber");
   assert.equal(statusTone("failed"), "rose");
   assert.equal(statusTone("unknown"), "violet");
+});
+
+test("keeps pending interventions distinct from review attention", () => {
+  const attention: OverviewSnapshot["attention"] = {
+    pending_reviews: 1,
+    pending_interventions: 2,
+    high_risk_reviews: 0,
+    failed_evaluations: 0,
+    integration_issues: 0,
+    stale_documentation: 0,
+  };
+  assert.equal(attention.pending_reviews, 1);
+  assert.equal(attention.pending_interventions, 2);
 });

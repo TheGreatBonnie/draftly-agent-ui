@@ -1,7 +1,22 @@
 import { request } from "./client.ts";
 
 export type DefinitionStatus = "active" | "paused" | "draft" | "archived";
-export type RunStatus = "queued" | "running" | "pending_review" | "completed" | "failed" | "cancelled" | "skipped";
+export type RunStatus = "queued" | "running" | "pending_review" | "pending_intervention" | "completed" | "failed" | "cancelled" | "skipped";
+export type InterventionAction = "approve" | "deny" | "guide";
+
+export interface PendingIntervention {
+  interrupt_id: string;
+  status: string;
+  phase: string | null;
+  role: string | null;
+  rule: string | null;
+  reason: string | null;
+  agent_id: string | null;
+  node_id: string | null;
+  tool_name: string | null;
+  created_at: string | null;
+  expires_at: string | null;
+}
 
 export interface WorkflowDefinition {
   id: string;
@@ -44,6 +59,7 @@ export interface WorkflowRun {
   completed_at: string | null;
   created_at: string | null;
   updated_at: string | null;
+  pending_interventions?: PendingIntervention[];
 }
 
 export interface WorkflowTemplate {
@@ -132,6 +148,17 @@ export function listWorkflowRuns(options: { definitionId?: string; status?: RunS
 
 export function getWorkflowRun(id: string): Promise<{ run: WorkflowRun }> {
   return request(`/workflow-runs/${encodeURIComponent(id)}`);
+}
+
+export function respondToIntervention(
+  runId: string,
+  interruptId: string,
+  payload: { action: InterventionAction; message?: string; idempotency_key: string },
+): Promise<{ intervention_id: string | null; interrupt_id: string; status: string; resolver: string | null; response_message: string | null; run_status: string | null }> {
+  return request(`/workflow-runs/${encodeURIComponent(runId)}/interventions/${encodeURIComponent(interruptId)}/respond`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export function getWorkflowRunSteps(id: string): Promise<{ items: Array<Record<string, unknown>> }> {

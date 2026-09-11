@@ -7,6 +7,8 @@ import { cancelWorkflowRun, retryWorkflowRun } from "@/api/workflows";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/dashboard/ui";
 import { useWorkflowRun } from "@/hooks/use-workflow-run";
 import { formatRelativeTime, statusTone } from "@/lib/workflow-view-model";
+import { SteeringInterventionPanel } from "./steering-intervention-panel";
+import { SteeringEventTimeline } from "./steering-event-timeline";
 
 export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: string; runId: string }) {
   const { data, error, isLoading, live, steps, artifacts, refresh } = useWorkflowRun(runId);
@@ -32,12 +34,14 @@ export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: strin
   if (error && !run) return <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">Unable to load run: {error}</div>;
   if (!run) return <EmptyState icon={<CircleAlert className="h-7 w-7" />} title="Run not found" description="This execution is unavailable in the current organization." action={<Link href={`/workflows/${encodeURIComponent(workflowId)}`}><Button>Back to workflow</Button></Link>} />;
 
+  const pendingInterventions = run.pending_interventions ?? [];
   const terminal = ["completed", "failed", "cancelled", "skipped"].includes(run.status);
   return (
     <>
       <div className="mb-3"><Link href={`/workflows/${encodeURIComponent(workflowId)}`} className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-brand"><ArrowLeft className="h-4 w-4" />Workflow</Link></div>
-      <PageHeader title={run.title || run.id} subtitle={`${run.repository || "No repository"} · ${run.actor || "Unknown actor"}`} actions={<><Badge tone={statusTone(run.status)}>{run.status}</Badge>{!terminal && <Button danger onClick={() => action("cancel")} disabled={busy}><Square className="h-4 w-4" />Cancel</Button>}{terminal && run.status !== "completed" && <Button onClick={() => action("retry")} disabled={busy}><RotateCcw className="h-4 w-4" />Retry</Button>}</>} />
+      <PageHeader title={run.title || run.id} subtitle={`${run.repository || "No repository"} · ${run.actor || "Unknown actor"}`} actions={<><Badge tone={statusTone(run.status)}>{run.status}</Badge>{!terminal && run.status !== "pending_intervention" && <Button danger onClick={() => action("cancel")} disabled={busy}><Square className="h-4 w-4" />Cancel</Button>}{terminal && run.status !== "completed" && <Button onClick={() => action("retry")} disabled={busy}><RotateCcw className="h-4 w-4" />Retry</Button>}</>} />
       {actionError && <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">{actionError}</div>}
+      {pendingInterventions.map((intervention) => <div className="mb-4" key={intervention.interrupt_id}><SteeringInterventionPanel intervention={intervention} runId={run.id} onResolved={refresh} /></div>)}
       <div className="grid gap-4 xl:grid-cols-[1.4fr_.8fr]">
         <Card className="p-5">
           <div className="flex items-center justify-between"><div><h2 className="font-semibold">Execution timeline</h2><p className="text-xs text-foreground-muted">{live.status === "live" ? "Live updates connected" : "Persisted execution state"}</p></div><Button onClick={refresh}>Refresh</Button></div>
@@ -51,6 +55,7 @@ export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: strin
           {run.error && <Card className="border-rose-200 p-4"><h3 className="font-semibold text-rose-700">Failure detail</h3><p className="mt-2 text-sm text-rose-700">{run.error}</p></Card>}
         </aside>
       </div>
+      <div className="mt-4"><SteeringEventTimeline events={live.events.filter((event) => event.type === "steering")} /></div>
     </>
   );
 }

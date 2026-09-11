@@ -13,7 +13,8 @@ export type StreamEventType =
   | "stage_manifest"
   | "stage_progress"
   | "overall_progress"
-  | "workflow_result";
+  | "workflow_result"
+  | "steering";
 
 export interface StreamEvent {
   type: StreamEventType;
@@ -39,7 +40,13 @@ const EVENT_TYPES: StreamEventType[] = [
   "stage_progress",
   "overall_progress",
   "workflow_result",
+  "steering",
 ];
+
+const DEBUG_SSE = process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_DEBUG_SSE === "1";
+const debugSse = (...args: unknown[]) => {
+  if (DEBUG_SSE) console.debug("[SSE]", ...args);
+};
 
 // A healthy SSE connection is kept alive by the server's periodic pings, so we
 // do NOT tear down after an idle period. Instead we only reconnect when the
@@ -81,7 +88,7 @@ export function useWorkflowEvents(
       }
     }
 
-    console.log("[SSE] apply event", {
+    debugSse("apply event", {
       type: event.type,
       seq: event.seq,
       runId: event.run_id,
@@ -135,7 +142,7 @@ export function useWorkflowEvents(
     const scheduleReconnect = () => {
       if (cancelled) return;
       if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        console.log("[SSE] max reconnect attempts reached", {
+        debugSse("max reconnect attempts reached", {
           run_id,
           attempts: reconnectAttempts,
         });
@@ -143,7 +150,7 @@ export function useWorkflowEvents(
         return;
       }
       reconnectAttempts += 1;
-      console.log("[SSE] scheduling reconnect", {
+      debugSse("scheduling reconnect", {
         run_id,
         attempt: reconnectAttempts,
       });
@@ -159,7 +166,7 @@ export function useWorkflowEvents(
 
     const connect = async () => {
       if (cancelled) return;
-      console.log("[SSE] connect start", { run_id });
+      debugSse("connect start", { run_id });
       setStatus("connecting");
       setReason("unknown");
       let ticket: string | undefined;
@@ -171,9 +178,9 @@ export function useWorkflowEvents(
           { method: "POST" },
         );
         ticket = fetched;
-        console.log("[SSE] ticket fetched", { run_id, hasTicket: !!ticket });
+        debugSse("ticket fetched", { run_id, hasTicket: !!ticket });
       } catch (err) {
-        console.log("[SSE] ticket fetch failed", { err });
+        debugSse("ticket fetch failed", { error: err instanceof Error ? err.message : String(err) });
         // A 404 means the run_id is genuinely unknown (e.g. a stale persisted
         // id), so retrying 5x with backoff would waste ~30s and never recover.
         // Report it distinctly and let a higher layer re-mint a fresh run.
@@ -194,7 +201,7 @@ export function useWorkflowEvents(
       const lastId = lastSeqRef.current
         ? `&Last-Event-ID=${encodeURIComponent(String(lastSeqRef.current))}`
         : "";
-      console.log("[SSE] creating EventSource", {
+      debugSse("creating EventSource", {
         run_id,
         url: `${apiBase}/api${streamBase}/${encodeURIComponent(run_id)}/events?ticket=...${lastId ? "&Last-Event-ID=..." : ""}`,
       });
@@ -205,26 +212,26 @@ export function useWorkflowEvents(
       sourceRef.current = nextSource;
 
       nextSource.onopen = () => {
-        console.log("[SSE] onopen - connection established", { run_id });
+        debugSse("onopen - connection established", { run_id });
         reconnectAttempts = 0;
         setReason("unknown");
         setStatus("live");
       };
       nextSource.onmessage = (e) => {
-        console.log("[SSE] onmessage", { data: e.data });
+        debugSse("onmessage", { hasData: Boolean(e.data) });
         apply(JSON.parse(e.data) as StreamEvent);
       };
       for (const t of EVENT_TYPES) {
         nextSource.addEventListener(t, (e) => {
-          console.log("[SSE] eventListener", {
+          debugSse("eventListener", {
             type: t,
-            data: (e as MessageEvent).data,
+            hasData: Boolean((e as MessageEvent).data),
           });
           apply(JSON.parse((e as MessageEvent).data) as StreamEvent);
         });
       }
       nextSource.onerror = (err) => {
-        console.log("[SSE] onerror", {
+        debugSse("onerror", {
           err,
           readyState: nextSource.readyState,
           doneRef: doneRef.current,

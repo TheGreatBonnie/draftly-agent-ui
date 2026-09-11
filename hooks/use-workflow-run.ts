@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { getWorkflowRun, getWorkflowRunArtifacts, getWorkflowRunSteps } from "@/api/workflows";
 import { useLiveRefresh } from "@/hooks/use-live-refresh";
 import { useWorkflowEvents } from "@/hooks/use-workflow-events";
@@ -16,6 +16,20 @@ export function useWorkflowRun(id: string) {
   }, [id]);
   const data = useLiveRefresh(fetchRun, ["workflow:changed", "review:completed"], 10_000);
   const live = useWorkflowEvents(id, { basePath: "/workflow-runs" });
+  const refreshedSteeringSeq = useRef(0);
+  const refreshRun = data.refresh;
+  useEffect(() => {
+    refreshedSteeringSeq.current = 0;
+  }, [id]);
+  useEffect(() => {
+    const interrupt = [...live.events]
+      .reverse()
+      .find((event) => event.type === "steering" && event.payload.action === "interrupt");
+    if (interrupt && interrupt.seq !== refreshedSteeringSeq.current) {
+      refreshedSteeringSeq.current = interrupt.seq;
+      refreshRun();
+    }
+  }, [live.events, refreshRun]);
   const mergedSteps = useMemo(() => {
     const persisted = data.data?.steps ?? [];
     const known = new Set(persisted.map((step) => `${String(step.seq)}:${String(step.name)}`));
@@ -24,5 +38,6 @@ export function useWorkflowRun(id: string) {
       .map((event) => ({ seq: event.seq, name: String(event.payload.name ?? event.node_id ?? event.type), status: event.type === "node_stop" ? String(event.payload.status ?? "completed").toLowerCase() : "running", detail: event.payload }));
     return [...persisted, ...liveSteps.filter((step) => !known.has(`${step.seq}:${step.name}`))];
   }, [data.data?.steps, live.events]);
-  return { ...data, live, steps: mergedSteps, artifacts: data.data?.artifacts ?? [] };
+  const steeringEvents = useMemo(() => live.events.filter((event) => event.type === "steering"), [live.events]);
+  return { ...data, live, steeringEvents, steps: mergedSteps, artifacts: data.data?.artifacts ?? [] };
 }

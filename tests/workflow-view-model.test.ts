@@ -4,6 +4,7 @@ import {
   filterWorkflows,
   formatDuration,
   formatRelativeTime,
+  interventionStatusLabel,
   getWorkflowStages,
   statusTone,
 } from "../lib/workflow-view-model.ts";
@@ -50,6 +51,8 @@ test("formats durations and maps statuses to accessible tones", () => {
   assert.equal(formatDuration(null), "—");
   assert.equal(statusTone("failed"), "rose");
   assert.equal(statusTone("pending_review"), "amber");
+  assert.equal(statusTone("pending_intervention"), "rose");
+  assert.equal(interventionStatusLabel("pending"), "Awaiting decision");
 });
 
 test("formats relative time without crashing on absent timestamps", () => {
