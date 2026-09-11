@@ -1,0 +1,16 @@
+"use client";
+
+import Link from "next/link";
+import { GitPullRequest, Workflow as WorkflowIcon } from "lucide-react";
+import { SectionTabs } from "@/components/dashboard/section-tabs";
+import { Badge, Button, Card, EmptyState, IconTile, PageHeader, Skeleton } from "@/components/dashboard/ui";
+import { useWorkflows } from "@/hooks/use-workflows";
+import { statusTone } from "@/lib/workflow-view-model";
+
+export function WorkflowsSubpage({ kind }: { kind: "active" | "paused" | "drafts" | "templates" }) {
+  const status = kind === "active" ? "active" : kind === "paused" ? "paused" : kind === "drafts" ? "draft" : undefined;
+  const { data, error, isLoading, templates } = useWorkflows({ status });
+  const title = kind === "active" ? "Active workflows" : kind === "paused" ? "Paused workflows" : kind === "drafts" ? "Workflow drafts" : "Workflow templates";
+  const items = kind === "templates" ? [] : (data?.items ?? []);
+  return <><PageHeader title={title} subtitle={kind === "templates" ? "Start from reusable organization-safe workflow templates." : "Manage persisted workflow definitions for the current organization."} /><SectionTabs section="workflows" />{error && <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">Unable to load workflows: {error}</div>}{isLoading && !data && kind !== "templates" ? <div className="mt-4 space-y-3"><Skeleton className="h-20 w-full" /><Skeleton className="h-20 w-full" /></div> : kind === "templates" ? <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{templates.items.length === 0 ? <div className="md:col-span-2 xl:col-span-3"><EmptyState icon={<WorkflowIcon className="h-7 w-7" />} title="No templates available" description="Templates will appear here when configured for this organization." /></div> : templates.items.map((template) => <Card key={template.id} className="p-5"><IconTile><WorkflowIcon className="h-5 w-5" /></IconTile><h3 className="mt-4 font-semibold">{template.name}</h3><p className="mt-1 text-xs text-foreground-muted">{template.description || `${template.workflow_key} template`}</p><Link href={`/workflows/new?template=${encodeURIComponent(template.id)}`}><Button className="mt-4">Use template</Button></Link></Card>)}</div> : items.length === 0 ? <div className="mt-4"><EmptyState icon={<WorkflowIcon className="h-7 w-7" />} title={`No ${title.toLowerCase()}`} description="There are no workflow definitions in this state." action={<Link href="/workflows/new"><Button primary>Create workflow</Button></Link>} /></div> : <div className="mt-4 space-y-3">{items.map((workflow) => <Card key={workflow.id} className="p-4"><div className="flex flex-col gap-4 sm:flex-row sm:items-center"><IconTile tone={workflow.workflow_key.includes("github") ? "blue" : "violet"}><GitPullRequest className="h-5 w-5" /></IconTile><div className="flex-1"><Link href={`/workflows/${encodeURIComponent(workflow.id)}`} className="font-semibold hover:text-brand">{workflow.name}</Link><p className="text-xs text-foreground-muted">{workflow.description || workflow.slug}</p></div><div className="text-xs"><span className="text-foreground-muted">Trigger</span><div>{String(workflow.trigger_config.event ?? "Configured")}</div></div><Badge tone={statusTone(workflow.status)}>{workflow.status}</Badge></div></Card>)}</div>}</>;
+}

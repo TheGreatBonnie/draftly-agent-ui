@@ -228,22 +228,15 @@ export async function listActiveJobs(): Promise<JobStatus[]> {
   return res.items;
 }
 
-export interface WorkflowListItem {
-  run_id: string;
-  title: string;
-  target_doc: string | null;
-  trigger_label: string;
-  status: string;
-  current_stage: string | null;
-  stages: string[];
-  current_stage_color: string;
-  time: string;
-}
-
-export async function listWorkflows(): Promise<WorkflowListItem[]> {
-  const res = await request<{ items: WorkflowListItem[] }>("/workflows");
-  return res.items;
-}
+export type {
+  DefinitionStatus,
+  RunStatus,
+  WorkflowDefinition,
+  WorkflowListResponse,
+  WorkflowRun,
+  WorkflowRunListResponse,
+  WorkflowTemplate,
+} from "./workflows.ts";
 
 export interface EvaluationItem {
   id: string;
