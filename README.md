@@ -1,10 +1,14 @@
 # Draftly UI — Next.js + TypeScript + Tailwind CSS
 
-High-fidelity frontend for Draftly, based on the supplied UI designs. Most product data remains local mock data, while the review workspace reads from the Draftly backend.
+High-fidelity frontend for Draftly, based on the supplied UI designs. Most product data remains local mock data, while the review workspace and agents observability pages read from the Draftly backend.
 
 ## Review workspace integration
 
 The review routes (`/reviews`, `/reviews/[id]`, and their status subroutes) require the running `draftly-agent-backend`, Clerk token setup for the active organization, and the `API_URL` rewrite so browser requests reach the backend. Review decisions are persisted through the backend GitHub review endpoint; they are not local-only actions.
+
+## Agents observability integration
+
+`/agents`, `/agents/active`, `/agents/idle`, and `/agents/[id]` use the authenticated `/api/agents` catalog and organization-scoped telemetry endpoints. The catalog is code-defined by the backend; configurable agent creation, editing, and deletion are not exposed. Agent detail hydrates historical steps from `/api/runs/{run_id}/steps` and subscribes to the existing Redis/SSE workflow stream for a selected run. The backend and Redis event stream must be reachable through the same authenticated API rewrite, and the Clerk token must contain the active organization.
 
 ## Run
 
@@ -38,7 +42,7 @@ Open `http://localhost:3000`.
 - Global command/search overlay and notification panel
 - Provider-specific and role-specific Lucide icons matching the visual language of the designs
 - Workflow detail and run trace pages
-- Agent detail and create-agent pages
+- Agent catalog, detail, historical run, and selected-run live activity pages
 - Evaluation run and test-case detail pages using Strands Eval SDK-oriented mock data
 - Activity event detail pages
 - Integration configuration and add-integration flow
@@ -70,9 +74,9 @@ The following top-level areas use horizontally scrollable responsive tabs that m
 - Evaluations: `/evaluations/runs`, `/evaluations/test-cases`, `/evaluations/datasets`, `/evaluations/evaluators`, `/evaluations/trends`
 - Documentation: `/documentation/by-repository`, `/documentation/by-topic`, `/documentation/outdated`, `/documentation/recently-updated`
 - Workflows: `/workflows/active`, `/workflows/paused`, `/workflows/drafts`, `/workflows/templates`
-- Agents: `/agents/active`, `/agents/idle`, `/agents/templates`
+- Agents: `/agents/active`, `/agents/idle`
 
-The shared route configuration is in `components/section-tabs.tsx`; reusable mock subpage presentations are in `components/section-subpage.tsx`.
+The shared route configuration is in `components/dashboard/section-tabs.tsx`; agents use focused components in `components/sections/agents/` and do not import the legacy agent mock dataset.
 
 ## Component structure
 

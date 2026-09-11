@@ -1,5 +1,4 @@
 export {
-  AgentsSubpage,
   DocumentationSubpage,
   EvaluationsSubpage,
   WorkflowsSubpage,

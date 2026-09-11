@@ -107,24 +107,36 @@ export interface AgentHistoryEntry {
 }
 
 export interface AgentSummary {
+  id: string;
   role: string;
   name: string;
   description: string;
   surface: string;
   tools: string[];
-  status: "idle" | "running" | "completed" | "failed";
-  activity: string;
-  history: AgentHistoryEntry[];
+  availability: "enabled" | "disabled" | "unavailable" | string;
+  last_run_status: "idle" | "running" | "completed" | "failed" | "unknown" | string;
+  runs_7d: number;
+  success_rate_7d: number | null;
+  last_run_at: string | null;
+  latest_run_id: string | null;
+  legacy_steps: number;
+  status?: string | null;
+  activity?: string | null;
+  history?: AgentHistoryEntry[];
 }
 
 export interface RunSummary {
   run_id: string;
-  agent_name: string;
-  status: "running" | "completed" | "failed";
+  source: string;
+  event_type: string;
+  org_id: string;
+  status: "running" | "completed" | "failed" | string;
+  error?: string | null;
   surface: string;
-  started_at: string;
-  finished_at?: string | null;
-  last_step_at?: string | null;
+  workflow_key?: string | null;
+  definition_id?: string | null;
+  started_at: string | null;
+  completed_at?: string | null;
 }
 
 export interface RunStepSummary {
@@ -134,6 +146,9 @@ export interface RunStepSummary {
   status: string;
   duration_ms?: number | null;
   detail?: Record<string, unknown>;
+  agent_id?: string | null;
+  node_id?: string | null;
+  surface?: string;
 }
 
 export interface AgentRun {

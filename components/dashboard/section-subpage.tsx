@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   AlertTriangle,
-  Bot,
   Boxes,
   CheckCircle2,
   Clock3,
@@ -25,14 +24,13 @@ import {
   Progress,
 } from "@/components/dashboard/ui";
 import { SectionTabs } from "@/components/dashboard/section-tabs";
-import { agents, workflows } from "@/lib/mock-data";
+import { workflows } from "@/lib/mock-data";
 
 type Section =
   | "reviews"
   | "evaluations"
   | "documentation"
-  | "workflows"
-  | "agents";
+  | "workflows";
 
 const docRows = [
   [
@@ -411,97 +409,6 @@ export function WorkflowsSubpage({ kind }: { kind: string }) {
               <Badge tone={w[5] ? "green" : "slate"}>
                 {w[5] ? "Active" : "Paused"}
               </Badge>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </>
-  );
-}
-
-export function AgentsSubpage({ kind }: { kind: string }) {
-  const title =
-    {
-      active: "Active agents",
-      idle: "Idle agents",
-      templates: "Agent templates",
-    }[kind] ?? "Agents";
-  if (kind === "templates")
-    return (
-      <>
-        <PageHeader
-          title={title}
-          subtitle="Reusable specialist-agent starting points for Draftly."
-        />
-        <SectionTabs section="agents" />
-        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {[
-            "Documentation specialist",
-            "Repository intelligence",
-            "Documentation reviewer",
-            "Support responder",
-            "Memory curator",
-            "Evaluation specialist",
-          ].map((x, i) => (
-            <Card key={x} className="p-5">
-              <IconTile
-                tone={i % 3 === 0 ? "blue" : i % 3 === 1 ? "violet" : "green"}>
-                <Bot className="h-5 w-5" />
-              </IconTile>
-              <h3 className="mt-4 font-semibold">{x}</h3>
-              <p className="mt-1 text-xs text-foreground-muted">
-                Includes recommended skills, tools, model profile, prompt
-                scaffold, and evaluation profile.
-              </p>
-              <Link href="/agents/new">
-                <Button className="mt-4">Use template</Button>
-              </Link>
-            </Card>
-          ))}
-        </div>
-      </>
-    );
-  const rows = agents.filter((a: any) =>
-    kind === "idle" ? a[3] !== "Active" : a[3] === "Active",
-  );
-  return (
-    <>
-      <PageHeader
-        title={title}
-        subtitle="Inspect specialist agents and their current execution state."
-      />
-      <SectionTabs section="agents" />
-      <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {rows.map((a: any, i: number) => (
-          <Card key={a[0]} className="p-4">
-            <div className="flex gap-3">
-              <IconTile tone={i % 2 ? "violet" : "blue"}>
-                <Bot className="h-5 w-5" />
-              </IconTile>
-              <div>
-                <Link
-                  href={`/agents/${String(a[0])
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, "-")}`}
-                  className="font-semibold hover:text-brand">
-                  {a[0]}
-                </Link>
-                <div className="mt-1">
-                  <Badge tone={a[3] === "Active" ? "green" : "slate"}>
-                    {a[3]}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            <p className="mt-4 text-xs leading-5 text-foreground-muted">
-              {a[1]}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-1">
-              {String(a[2])
-                .split(", ")
-                .map((x: string) => (
-                  <Badge key={x}>{x}</Badge>
-                ))}
             </div>
           </Card>
         ))}

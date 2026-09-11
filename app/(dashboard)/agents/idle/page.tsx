@@ -1,2 +1,2 @@
-import { AgentsSubpage } from "@/components/sections/agents";
-export default function Page(){return <AgentsSubpage kind="idle"/>}
+import { AgentsPage } from "@/components/sections/agents";
+export default function Page(){return <AgentsPage initialStatus="idle" />}
