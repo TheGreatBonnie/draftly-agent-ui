@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { request } from "./client.ts";
 
 export interface RunRecord {
   run_id: string;
@@ -254,9 +254,11 @@ export interface EvaluationItem {
 }
 
 export async function listEvaluations(
-  limit = 50,
+  options: { limit?: number; evaluation_type?: string; target_id?: string } = {},
 ): Promise<{ items: EvaluationItem[] }> {
-  const params = new URLSearchParams({ limit: String(limit) });
+  const params = new URLSearchParams({ limit: String(options.limit ?? 50) });
+  if (options.evaluation_type) params.set("evaluation_type", options.evaluation_type);
+  if (options.target_id) params.set("target_id", options.target_id);
   return request(`/evaluations?${params.toString()}`);
 }
 

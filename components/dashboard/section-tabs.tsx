@@ -23,7 +23,7 @@ export const sectionTabs = {
     { label: "All documents", href: "/documentation" },
     { label: "By repository", href: "/documentation/by-repository" },
     { label: "By topic", href: "/documentation/by-topic" },
-    { label: "Outdated", href: "/documentation/outdated", count: 8 },
+    { label: "Outdated", href: "/documentation/outdated" },
     { label: "Recently updated", href: "/documentation/recently-updated" },
   ],
   workflows: [
