@@ -1,0 +1,21 @@
+"use client";
+
+import Link from "next/link";
+import { AlertTriangle, ArrowLeft, CheckCircle2, FileCode2, Target } from "lucide-react";
+import { Badge, Card, IconTile, PageHeader, Progress, Tabs } from "@/components/dashboard/ui";
+import { useEvaluationRun } from "@/hooks/use-evaluations";
+import { evaluationScore, evaluationTone, formatEvaluationDate } from "@/lib/evaluations";
+
+export function EvaluationCasePage({ caseId, runId }: { caseId: string; runId?: string }) {
+  const result = useEvaluationRun(runId ?? "");
+  if (!runId) return <div role="alert" className="text-sm text-rose-700">This case is not linked to an evaluation run.</div>;
+  if (result.isLoading && !result.data) return <div role="status" className="text-sm text-foreground-muted">Loading case result…</div>;
+  if (result.error && !result.data) return <div role="alert" className="text-sm text-rose-700">{result.error}</div>;
+  const item = result.data?.cases.find((candidate) => candidate.id === caseId || candidate.case_id === caseId);
+  if (!item) return <div role="status" className="text-sm text-foreground-muted">Case result not found in this run.</div>;
+  return <><Link href={`/evaluations/runs/${encodeURIComponent(runId)}`} className="mb-3 inline-flex items-center gap-1 text-sm text-foreground-muted"><ArrowLeft className="h-4 w-4" />Evaluation run</Link><PageHeader title={item.metric} subtitle={`Test case ${item.dataset} / ${item.case_id}`} actions={<Badge tone={evaluationTone(item.passed ? "passed" : "failed")}>{item.passed ? "Passed" : "Failed"}</Badge>} /><Tabs active="Result" items={["Result", "Expected", "Actual output", "Evidence", "Trace"]} /><div className="mt-4 grid gap-4 lg:grid-cols-[1fr_320px]"><div className="space-y-4"><Card className="p-5"><div className="flex gap-4"><IconTile size="lg" tone={item.passed ? "green" : "rose"}>{item.passed ? <CheckCircle2 className="h-7 w-7" /> : <AlertTriangle className="h-7 w-7" />}</IconTile><div className="flex-1"><div className="flex justify-between text-sm"><span>Evaluation score</span><b>{evaluationScore(item.score)}</b></div><Progress value={item.score ?? 0} tone={item.passed ? "green" : "rose"} /><p className="mt-4 text-sm leading-6 text-foreground-secondary">{item.reason || "No evaluator explanation was recorded."}</p></div></div></Card><TextCard title="Input" value={item.input} tone="blue" /><TextCard title="Expected output" value={item.expected_output} tone="emerald" /><TextCard title="Actual output" value={item.actual_output} tone="rose" /><Card className="p-5"><h2 className="font-semibold">Evaluator evidence</h2>{item.evidence.length === 0 ? <p className="mt-4 text-sm text-foreground-muted">No evidence was recorded.</p> : <pre className="mt-4 max-h-96 overflow-auto rounded-lg border border-border bg-surface-subtle p-4 text-xs leading-6">{JSON.stringify(item.evidence, null, 2)}</pre>}</Card></div><aside className="space-y-4"><Card className="p-4"><div className="flex items-center gap-3"><IconTile><Target className="h-5 w-5" /></IconTile><div><div className="text-sm font-semibold">Threshold</div><div className="text-xs text-foreground-muted">{item.threshold == null ? "No numeric threshold" : `Pass at ${evaluationScore(item.threshold)} or higher`}</div></div></div></Card><Card className="p-4"><div className="flex items-center gap-3"><IconTile tone="violet"><FileCode2 className="h-5 w-5" /></IconTile><div><div className="text-sm font-semibold">Run trace</div><div className="text-xs text-foreground-muted">{item.trace_id || "Unavailable"}</div></div></div><div className="mt-3 text-xs text-foreground-muted">{item.duration_ms == null ? "Duration unavailable" : `${item.duration_ms} ms`} · {formatEvaluationDate(result.data?.summary.started_at ?? null)}</div></Card></aside></div></>;
+}
+
+function TextCard({ title, value, tone }: { title: string; value: string | null; tone: "blue" | "emerald" | "rose" }) {
+  return <Card className="p-5"><h2 className="font-semibold">{title}</h2><div className={`mt-4 rounded-lg border p-4 text-sm leading-6 ${tone === "emerald" ? "border-emerald-100 bg-emerald-50/50" : tone === "rose" ? "border-rose-100 bg-rose-50/50" : "border-border bg-surface-subtle"}`}>{value || "Unavailable"}</div></Card>;
+}
