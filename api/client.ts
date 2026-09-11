@@ -78,7 +78,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       throw new ApiError(res.status, "Backend returned HTML — check if the API server is running");
     }
     const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new ApiError(res.status, body.detail ?? body.error ?? "Request failed");
+    const message = Array.isArray(body.detail)
+      ? body.detail.map((d: { msg?: string }) => d?.msg ?? "Request failed").join("; ")
+      : body.detail ?? body.error ?? "Request failed";
+    throw new ApiError(res.status, message);
   }
   if (contentType.includes("text/html")) {
     throw new ApiError(res.status, "Backend returned HTML — check if the API server is running");

@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { request } from "./client.ts";
 import type { GitHubInstallation, GitHubInstallUrl } from "./types";
 
 /** Fetch the GitHub App install URL. When returnTo is provided, the backend
@@ -29,22 +29,27 @@ export async function deleteGitHubInstallation(installationId: number) {
 export interface ReviewDecisionResult {
   status: string;
   run_id: string;
+  rework_run_id?: string | null;
 }
 
-/** Approve/reject a pending review via the existing resume route
+export type ReviewDecision = "approve" | "request_changes" | "reject";
+
+/** Apply a decision to a pending review via the existing resume route
  *  (POST /github/review/{run_id}); the server trusts the stored review
  *  identity over any client-supplied reviewer id. */
 export async function decideReview(
   runId: string,
-  approved: boolean,
-  comment?: string,
+  reviewId: string,
+  decision: ReviewDecision,
+  comment = "",
 ): Promise<ReviewDecisionResult> {
   return request(`/github/review/${encodeURIComponent(runId)}`, {
     method: "POST",
     body: JSON.stringify({
-      approved,
+      review_id: reviewId,
       reviewer_id: "",
-      comment: comment ?? null,
+      decision,
+      comment,
     }),
   });
 }

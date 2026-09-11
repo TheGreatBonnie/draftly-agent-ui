@@ -1,80 +1,92 @@
 "use client";
 import { useState } from "react";
 import { Check, RotateCcw, X } from "lucide-react";
-import { Button, MockDialog } from "@/components/dashboard/ui";
-export default function ReviewActions() {
-  const [dialog, setDialog] = useState<"approve" | "changes" | "reject" | null>(
-    null,
-  );
-  const [status, setStatus] = useState("Pending review");
+import { Button } from "@/components/dashboard/ui";
+
+import { decideReview, type ReviewDecisionResult } from "@/api/github";
+import {
+  buildReviewDecision,
+  canDecideReview,
+  type ReviewDecisionKind,
+} from "@/lib/review-actions";
+
+export interface ReviewActionsProps {
+  runId: string;
+  reviewId: string;
+  status: string;
+  onDecisionSaved?: (result: ReviewDecisionResult) => void;
+}
+
+export default function ReviewActions({ runId, reviewId, status, onDecisionSaved }: ReviewActionsProps) {
+  const [comment, setComment] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const actionable = canDecideReview(status);
+
+  async function submitDecision(kind: ReviewDecisionKind) {
+    if (pending || !actionable) return;
+    if (kind === "request_changes" && !comment.trim()) {
+      setError("Add a comment explaining the changes the agents should make.");
+      return;
+    }
+    setPending(true);
+    setError(null);
+    const decision = buildReviewDecision(runId, kind, comment);
+    try {
+      const result = await decideReview(decision.runId, reviewId, decision.decision, decision.comment);
+      setComment("");
+      onDecisionSaved?.(result);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (!actionable) return null;
+
   return (
-    <>
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-3 p-4">
+      <div>
+        <label htmlFor="review-decision-comment" className="text-xs font-medium text-foreground-secondary">
+          Reviewer comment
+        </label>
+        <textarea
+          id="review-decision-comment"
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+          className="mt-2 min-h-24 w-full resize-y rounded-lg border border-border bg-surface p-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+          placeholder="Explain what the agents should address..."
+          disabled={pending}
+        />
+        <p className="mt-1 text-xs text-foreground-muted">
+          A comment is required when requesting changes.
+        </p>
+      </div>
+      {error && <p role="alert" className="text-xs text-danger">{error}</p>}
+      <div className="grid gap-2 sm:grid-cols-3">
         <Button
-          onClick={() => setDialog("approve")}
+          onClick={() => { void submitDecision("approve"); }}
+          disabled={pending}
           className="border-emerald-300 text-emerald-700">
           <Check className="h-4 w-4" />
           Approve
         </Button>
         <Button
-          onClick={() => setDialog("changes")}
+          onClick={() => { void submitDecision("request_changes"); }}
+          disabled={pending}
           className="border-amber-300 text-amber-700">
           <RotateCcw className="h-4 w-4" />
           Request changes
         </Button>
         <Button
-          onClick={() => setDialog("reject")}
+          onClick={() => { void submitDecision("reject"); }}
+          disabled={pending}
           className="border-rose-300 text-rose-700">
           <X className="h-4 w-4" />
           Reject
         </Button>
       </div>
-      <MockDialog
-        open={dialog !== null}
-        onClose={() => setDialog(null)}
-        title={
-          dialog === "approve"
-            ? "Approve documentation change?"
-            : dialog === "changes"
-              ? "Request changes from Draftly?"
-              : "Reject this change?"
-        }
-        description={
-          dialog === "approve"
-            ? "The approved mock change will move to delivery."
-            : dialog === "changes"
-              ? "Your feedback becomes input to the next mock agent revision."
-              : "This mock proposal will be marked rejected."
-        }
-        confirmLabel={
-          dialog === "approve"
-            ? "Approve"
-            : dialog === "changes"
-              ? "Request changes"
-              : "Reject"
-        }
-        danger={dialog === "reject"}
-        onConfirm={() =>
-          setStatus(
-            dialog === "approve"
-              ? "Approved"
-              : dialog === "changes"
-                ? "Needs changes"
-                : "Rejected",
-          )
-        }>
-        <textarea
-          className="h-24 w-full rounded-lg border border-slate-200 p-3 text-sm outline-none"
-          placeholder={
-            dialog === "changes"
-              ? "Clarify what Draftly should revise..."
-              : "Add an optional comment..."
-          }
-        />
-        <div className="mt-2 text-xs text-slate-400">
-          Current mock state: {status}
-        </div>
-      </MockDialog>
-    </>
+    </div>
   );
 }

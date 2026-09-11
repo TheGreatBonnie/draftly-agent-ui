@@ -1,6 +1,10 @@
 # Draftly UI — Next.js + TypeScript + Tailwind CSS
 
-High-fidelity mock frontend for Draftly, based on the supplied UI designs. All product data is local mock data; no backend or credentials are required.
+High-fidelity frontend for Draftly, based on the supplied UI designs. Most product data remains local mock data, while the review workspace reads from the Draftly backend.
+
+## Review workspace integration
+
+The review routes (`/reviews`, `/reviews/[id]`, and their status subroutes) require the running `draftly-agent-backend`, Clerk token setup for the active organization, and the `API_URL` rewrite so browser requests reach the backend. Review decisions are persisted through the backend GitHub review endpoint; they are not local-only actions.
 
 ## Run
 
@@ -41,14 +45,14 @@ Open `http://localhost:3000`.
 - Knowledge documents, sources, graph, topics, and embeddings pages
 - Settings subpages for organization, model routing, GitHub, notifications, security, billing, advanced configuration, and audit logs
 - Documentation detail editor with preview, evidence, and AI suggestions
-- Review action confirmation/feedback dialogs
+- Review action confirmation/feedback dialogs backed by the Draftly API
 - System status and onboarding pages
 - Global loading, error, and not-found states
 - Mock datasets in `lib/mock-data.ts`
 
 ## Notes
 
-This is a frontend prototype. Actions mutate local UI state only and do not persist. Replace the mock data and actions with Draftly API calls when integrating the production backend.
+Non-review prototype routes may still use local mock data. The review routes are integrated with the authenticated Draftly API and require the backend setup described above.
 
 
 ## Dark mode and semantic design tokens

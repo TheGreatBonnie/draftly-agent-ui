@@ -25,7 +25,7 @@ import {
   Progress,
 } from "@/components/dashboard/ui";
 import { SectionTabs } from "@/components/dashboard/section-tabs";
-import { agents, reviews, workflows } from "@/lib/mock-data";
+import { agents, workflows } from "@/lib/mock-data";
 
 type Section =
   | "reviews"
@@ -68,94 +68,6 @@ const evalRuns = [
   ["run_01H6K9", "Redis caching guide", "documentation", 14, 14, 0, 96],
   ["run_01H5Q8", "Support response evaluation", "support", 16, 13, 3, 84],
 ];
-
-export function ReviewsSubpage({ kind }: { kind: string }) {
-  const map: Record<string, (r: any) => boolean> = {
-    pending: (r) => r.status === "Pending",
-    "needs-attention": (r) =>
-      r.status === "Urgent" || r.status === "Needs changes",
-    approved: (r) => r.status === "Approved",
-    rejected: (r) => r.status === "Rejected",
-  };
-  const rows = reviews.filter(map[kind] ?? (() => true));
-  const title =
-    {
-      pending: "Pending reviews",
-      "needs-attention": "Reviews needing attention",
-      approved: "Approved reviews",
-      rejected: "Rejected reviews",
-    }[kind] ?? "Reviews";
-  return (
-    <>
-      <PageHeader
-        title={title}
-        subtitle="Human-in-the-loop documentation review queue backed by mock review data."
-      />
-      <SectionTabs section="reviews" />
-      <div className="mt-4 space-y-3">
-        {(rows.length ? rows : reviews.slice(0, 3)).map((r: any) => (
-          <Card className="p-4" key={r.id}>
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
-              <IconTile
-                tone={
-                  r.status === "Urgent"
-                    ? "rose"
-                    : r.status === "Approved"
-                      ? "green"
-                      : "blue"
-                }>
-                <FileCheck2 className="h-5 w-5" />
-              </IconTile>
-              <div className="min-w-0 flex-1">
-                <Link
-                  href={`/reviews/${r.id}`}
-                  className="font-semibold hover:text-brand">
-                  {r.title}
-                </Link>
-                <p className="mt-1 text-xs text-foreground-muted">
-                  {r.description}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Badge>{r.repo}</Badge>
-                  <Badge tone="slate">{r.type}</Badge>
-                  <Badge
-                    tone={
-                      r.risk === "High"
-                        ? "rose"
-                        : r.risk === "Medium"
-                          ? "amber"
-                          : "green"
-                    }>
-                    {r.risk} risk
-                  </Badge>
-                </div>
-              </div>
-              <div className="w-full md:w-40">
-                <div className="mb-1 flex justify-between text-xs">
-                  <span>Evaluation</span>
-                  <b>{r.score}%</b>
-                </div>
-                <Progress value={r.score} />
-              </div>
-              <Badge
-                tone={
-                  r.status === "Approved"
-                    ? "green"
-                    : r.status === "Urgent"
-                      ? "rose"
-                      : r.status === "Needs changes"
-                        ? "amber"
-                        : "blue"
-                }>
-                {r.status}
-              </Badge>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </>
-  );
-}
 
 export function EvaluationsSubpage({ kind }: { kind: string }) {
   const title =
