@@ -25,12 +25,17 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+## Prerequisites
+
+- Node.js >= 22.6 (test script uses `--experimental-strip-types`)
+- Backend running at `http://localhost:8000` (see `draftly-agent-backend/README.md`)
+- Clerk account with a JWT template named "Draftly"
+
 ## Core routes
 
-- `/` — Overview dashboard
+- `/` — Marketing landing page (Overview is `/overview`)
 - `/knowledge` — Knowledge overview
 - `/knowledge/documents`, `/knowledge/sources`, `/knowledge/graph`, `/knowledge/topics`, `/knowledge/embeddings`
-- `/activity` and `/activity/[id]`
 - `/reviews` and `/reviews/[id]`
 - `/evaluations`, `/evaluations/runs/[runId]`, `/evaluations/test-cases/[caseId]`
 - `/documentation`, `/documentation/[slug]`, `/documentation/[slug]/edit`
@@ -75,7 +80,6 @@ Prefer semantic utilities for new UI (`bg-background`, `bg-surface`, `text-foreg
 
 The following top-level areas use horizontally scrollable responsive tabs that map to real routes and mock-driven subpages:
 
-- Activity: `/activity/document-changes`, `/activity/workflow-runs`, `/activity/evaluations`, `/activity/support`, `/activity/system`
 - Reviews: `/reviews/pending`, `/reviews/needs-attention`, `/reviews/approved`, `/reviews/rejected`
 - Evaluations: `/evaluations/runs`, `/evaluations/test-cases`, `/evaluations/datasets`, `/evaluations/evaluators`, `/evaluations/trends`
 - Documentation: `/documentation/by-repository`, `/documentation/by-topic`, `/documentation/outdated`, `/documentation/recently-updated`
