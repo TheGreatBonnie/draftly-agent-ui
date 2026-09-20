@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { request } from "./client.ts";
 import type {
   OnboardingStatus,
   WorkspacePayload,
@@ -9,6 +9,7 @@ import type {
   PreferencesPayload,
   DiscoveryResult,
   InitializeStatus,
+  RefreshResult,
 } from "@/lib/onboarding/types";
 
 export async function getOnboardingStatus(): Promise<OnboardingStatus> {
@@ -106,4 +107,13 @@ export async function retryInitialize(): Promise<{
 
 export async function completeOnboarding(): Promise<{ state: string }> {
   return request("/onboarding/complete", { method: "POST" });
+}
+
+export async function refreshDocumentation(
+  urls: string[],
+): Promise<RefreshResult> {
+  return request("/onboarding/documentation/refresh", {
+    method: "POST",
+    body: JSON.stringify({ urls }),
+  });
 }
