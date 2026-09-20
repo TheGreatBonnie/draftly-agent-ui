@@ -27,8 +27,9 @@ export default function DocumentationPage() {
         Discover your documentation
       </h1>
       <p className="text-[15px] leading-[1.55] text-[#53648e]">
-        Draftly scanned your repository and detected documentation
-        <br /> files, directories, and knowledge sources.
+        We discovered the documentation sources you configured.
+        <br />
+        Review and confirm them, or run a sync to refresh.
       </p>
       {error && <div className="mt-4"><ErrorBanner message={error} onDismiss={clearError} /></div>}
       <div className="mb-8">

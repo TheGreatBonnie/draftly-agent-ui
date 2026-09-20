@@ -1,16 +1,14 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { discoverDocumentation } from "@/api/onboarding";
-import { BookOpen, Braces, FileText, History, ShieldCheck, SquareCode } from "lucide-react";
+import { discoverDocumentation, getOnboardingStatus, refreshDocumentation } from "@/api/onboarding";
+import { ApiError } from "@/api/client";
+import { AlertTriangle, BookOpen, Braces, FileText, History, RefreshCw, ShieldCheck, SquareCode } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStepDraft } from "@/lib/onboarding/use-draft";
-import {
-  InfoRow,
-  cardBase,
-  tileBubble,
-} from "@/components/onboarding/design/info-row";
+import { InfoRow, cardBase, tileBubble } from "@/components/onboarding/design/info-row";
 import { DesignButton } from "@/components/onboarding/design/button";
-import type { DiscoveryResult } from "@/lib/onboarding/types";
+import { candidateLabel, isPublicDocumentation } from "@/lib/onboarding/source-model";
+import type { DiscoveryResult, RefreshResult } from "@/lib/onboarding/types";
 
 interface Props {
   onConfirm: (include: string[], exclude: string[]) => void;
@@ -21,16 +19,44 @@ const formLabel = "mb-[9px] mt-[22px] block text-[13px] font-bold text-[#101a43]
 
 export function DocumentationSources({ onConfirm, loading = false }: Props) {
   const [discovery, setDiscovery] = useState<DiscoveryResult | null>(null);
+  const [publicSource, setPublicSource] = useState(false);
   const [excludedList, setExcludedList] = useStepDraft<string[]>("documentation", []);
   const [discoveryLoading, setDiscoveryLoading] = useState(true);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncResult, setSyncResult] = useState<RefreshResult | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const excluded = useMemo(() => new Set(excludedList), [excludedList]);
 
   useEffect(() => {
-    discoverDocumentation()
-      .then(setDiscovery)
+    let cancelled = false;
+    Promise.all([
+      getOnboardingStatus().catch(() => null),
+      discoverDocumentation(),
+    ])
+      .then(([status, result]) => {
+        if (cancelled) return;
+        setPublicSource(isPublicDocumentation(status?.selected_repository?.source_type as string | undefined));
+        setDiscovery(result);
+      })
       .catch(() => setDiscovery(null))
       .finally(() => setDiscoveryLoading(false));
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  async function handleSync() {
+    if (!discovery) return;
+    setSyncLoading(true);
+    setSyncError(null);
+    try {
+      setSyncResult(await refreshDocumentation(discovery.candidates));
+    } catch (e) {
+      setSyncError(e instanceof ApiError ? e.message : "Documentation sync failed.");
+    } finally {
+      setSyncLoading(false);
+    }
+  }
 
   if (discoveryLoading)
     return (
@@ -57,17 +83,15 @@ export function DocumentationSources({ onConfirm, loading = false }: Props) {
     <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-[35px] max-[900px]:grid-cols-1">
       <div>
         <label className={formLabel}>
-          Documentation directory (recommended){""}
+          {publicSource ? "Documentation site" : "Documentation directory (recommended)"}{""}
           <span className="ml-1 font-normal text-[#71809b]">ⓘ</span>
         </label>
         <div className="flex items-center justify-between gap-2.5 rounded-lg border border-[#cdd8ea] px-[13px] py-[11px] text-[#657494]">
-          docs/ <FileText size={18} />
+          {publicSource ? "Public documentation URLs" : "docs/"} <FileText size={18} />
         </div>
         <label className={formLabel}>
           Include in scan{" "}
-          <span className="text-[11px] font-medium text-[#32ae70]">
-            {discovery.count} found
-          </span>
+          <span className="text-[11px] font-medium text-[#32ae70]">{discovery.count} found</span>
         </label>
         <div className="max-h-72 overflow-y-auto pr-1">
           <div className="grid grid-cols-2 gap-3.5 max-[900px]:grid-cols-1 max-[560px]:grid-cols-1">
@@ -99,9 +123,9 @@ export function DocumentationSources({ onConfirm, loading = false }: Props) {
                     <i className="inline-flex shrink-0 not-italic text-brand">
                       <FileText size={15} />
                     </i>
-                    {path.split("/").pop()}
+                    {candidateLabel(path)}
                   </b>
-                  <small className="mt-1.5 flex items-center gap-1.5 text-xs text-[#53648e]">
+                  <small className="mt-1.5 flex items-center gap-1.5 text-xs break-all text-[#53648e]">
                     {path}
                   </small>
                 </button>
@@ -109,6 +133,28 @@ export function DocumentationSources({ onConfirm, loading = false }: Props) {
             })}
           </div>
         </div>
+
+        {publicSource && (
+          <div className="mt-[22px]">
+            <div className="flex flex-wrap items-center gap-3">
+              <DesignButton primary onClick={handleSync} disabled={syncLoading}>
+                {syncLoading ? "Syncing…" : "Sync documentation"} <RefreshCw size={16} />
+              </DesignButton>
+              {syncResult && (
+                <span className="text-xs text-[#50618a]">
+                  {syncResult.skipped} skipped · {syncResult.replaced} replaced ·{" "}
+                  {syncResult.failed} failed · {syncResult.deleted} deleted
+                </span>
+              )}
+            </div>
+            {syncError && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500">
+                <AlertTriangle size={13} /> {syncError}
+              </p>
+            )}
+          </div>
+        )}
+
         <DesignButton
           primary
           className="mt-[22px]"
@@ -119,50 +165,16 @@ export function DocumentationSources({ onConfirm, loading = false }: Props) {
       </div>
       <div className={`${cardBase} px-5 py-[22px] max-[900px]:order-2`}>
         <h3 className="mb-2 text-base text-[#101a43]">What we&apos;ll discover</h3>
-        <InfoRow
-          className="py-[7px]"
-          bubbleClassName={tileBubble}
-          icon={<FileText size={17} />}
-          title="Documentation files"
-          text="Markdown, guides, references"
-        />
-        <InfoRow
-          className="border-t border-[#e6ebf3] py-[7px]"
-          bubbleClassName={tileBubble}
-          icon={<Braces size={17} />}
-          title="API references"
-          text="OpenAPI, endpoints, schemas"
-        />
-        <InfoRow
-          className="border-t border-[#e6ebf3] py-[7px]"
-          bubbleClassName={tileBubble}
-          icon={<BookOpen size={17} />}
-          title="Architecture docs"
-          text="Diagrams, ADRs, design docs"
-        />
-        <InfoRow
-          className="border-t border-[#e6ebf3] py-[7px]"
-          bubbleClassName={tileBubble}
-          icon={<SquareCode size={17} />}
-          title="Examples & tutorials"
-          text="Usage, code examples, how-tos"
-        />
-        <InfoRow
-          className="border-t border-[#e6ebf3] py-[7px]"
-          bubbleClassName={tileBubble}
-          icon={<History size={17} />}
-          title="Changelogs"
-          text="Releases and version history"
-        />
+        <InfoRow className="py-[7px]" bubbleClassName={tileBubble} icon={<FileText size={17} />} title="Documentation files" text="Markdown, guides, references" />
+        <InfoRow className="border-t border-[#e6ebf3] py-[7px]" bubbleClassName={tileBubble} icon={<Braces size={17} />} title="API references" text="OpenAPI, endpoints, schemas" />
+        <InfoRow className="border-t border-[#e6ebf3] py-[7px]" bubbleClassName={tileBubble} icon={<BookOpen size={17} />} title="Architecture docs" text="Diagrams, ADRs, design docs" />
+        <InfoRow className="border-t border-[#e6ebf3] py-[7px]" bubbleClassName={tileBubble} icon={<SquareCode size={17} />} title="Examples & tutorials" text="Usage, code examples, how-tos" />
+        <InfoRow className="border-t border-[#e6ebf3] py-[7px]" bubbleClassName={tileBubble} icon={<History size={17} />} title="Changelogs" text="Releases and version history" />
         <div className="rounded-[9px] bg-[#f0f5ff] p-[15px] text-xs leading-[1.5] text-[#263a6f]">
-          <ShieldCheck
-            size={20}
-            className="float-left mr-2.5 box-content rounded-lg bg-[#dce8fd] p-1.5 text-brand"
-          />
+          <ShieldCheck size={20} className="float-left mr-2.5 box-content rounded-lg bg-[#dce8fd] p-1.5 text-brand" />
           <b>Safe & read-only</b>
           <p className="mt-1.5 text-[11px] text-[#50618a]">
-            Draftly never writes to your repository. We only read content
-            you&apos;ve authorized.
+            Draftly only reads content you&apos;ve authorized.
           </p>
         </div>
       </div>
