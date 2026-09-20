@@ -27,3 +27,24 @@ export function validateDocStyle(style: string): string | null {
   if (!valid.includes(style)) return `Documentation style must be one of: ${valid.join(", ")}`;
   return null;
 }
+
+export function validatePublicDocsRootUrl(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return "Documentation URL is required";
+  try {
+    const u = new URL(trimmed);
+    if (u.protocol !== "https:") return "Documentation URL must start with https://";
+    if (u.username || u.password) return "Documentation URL must not contain credentials";
+    if (!u.hostname) return "Enter a valid URL (e.g. https://docs.example.com)";
+    return null;
+  } catch {
+    return "Enter a valid URL (e.g. https://docs.example.com)";
+  }
+}
+
+export function parsePathList(value: string): string[] {
+  return value
+    .split(/[\n,]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}

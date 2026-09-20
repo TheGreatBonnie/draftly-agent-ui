@@ -32,12 +32,29 @@ export interface WorkspacePayload {
   name: string;
   description?: string;
 }
+export type SourceType = "github_repository" | "public_documentation";
+
+export interface PublicDocumentationConfig {
+  root_url: string;
+  include_paths?: string[];
+  exclude_paths?: string[];
+  crawl_instructions?: string;
+}
+
+export interface RefreshResult {
+  skipped: number;
+  replaced: number;
+  failed: number;
+  deleted: number;
+}
 export interface GitHubConnectPayload {
   installation_id: number;
 }
 export interface RepositoryPayload {
   full_name: string;
   default_branch?: string;
+  source_type?: SourceType;
+  documentation_config?: PublicDocumentationConfig;
 }
 export interface SourcesPayload {
   include?: string[];
@@ -62,7 +79,7 @@ export interface PreferencesPayload {
 export interface DiscoveryResult {
   candidates: string[];
   count: number;
-  total_files: number;
+  total_files?: number; // GitHub-only; absent for public_documentation
 }
 
 export interface StageConfig {
