@@ -1,4 +1,5 @@
 import { request } from "./client.ts";
+import type { PageResultItem } from "./workflows";
 
 export interface RunRecord {
   run_id: string;
@@ -90,6 +91,7 @@ export interface ReviewDisplay {
   evidence: ReviewEvidenceItem[];
   github_url: string | null;
   updated_at: string | null;
+  page_results?: PageResultItem[];
 }
 
 export interface ReviewListCounts {

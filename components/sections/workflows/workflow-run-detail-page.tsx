@@ -6,7 +6,9 @@ import { ArrowLeft, CheckCircle2, CircleAlert, Clock3, RotateCcw, Square } from 
 import { cancelWorkflowRun, retryWorkflowRun } from "@/api/workflows";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/dashboard/ui";
 import { useWorkflowRun } from "@/hooks/use-workflow-run";
+import { normalizePageResults } from "@/lib/page-evaluations";
 import { formatRelativeTime, statusTone } from "@/lib/workflow-view-model";
+import { PageEvaluationPanel } from "./page-evaluation-panel";
 import { SteeringInterventionPanel } from "./steering-intervention-panel";
 import { SteeringEventTimeline } from "./steering-event-timeline";
 
@@ -36,6 +38,7 @@ export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: strin
 
   const pendingInterventions = run.pending_interventions ?? [];
   const terminal = ["completed", "failed", "cancelled", "skipped"].includes(run.status);
+  const pageEvaluations = normalizePageResults(run.page_results);
   return (
     <>
       <div className="mb-3"><Link href={`/workflows/${encodeURIComponent(workflowId)}`} className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-brand"><ArrowLeft className="h-4 w-4" />Workflow</Link></div>
@@ -55,6 +58,7 @@ export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: strin
           {run.error && <Card className="border-rose-200 p-4"><h3 className="font-semibold text-rose-700">Failure detail</h3><p className="mt-2 text-sm text-rose-700">{run.error}</p></Card>}
         </aside>
       </div>
+      <div className="mt-4"><PageEvaluationPanel pages={pageEvaluations} /></div>
       <div className="mt-4"><SteeringEventTimeline events={live.events.filter((event) => event.type === "steering")} /></div>
     </>
   );

@@ -60,6 +60,19 @@ export interface WorkflowRun {
   created_at: string | null;
   updated_at: string | null;
   pending_interventions?: PendingIntervention[];
+  page_results?: PageResultItem[];
+}
+
+export interface PageResultItem {
+  page_id: string;
+  path: string;
+  status: string;
+  version: number;
+  attempts: number;
+  score: number | null;
+  failed_metrics: string[];
+  feedback: string[];
+  escalation_reason: string | null;
 }
 
 export interface WorkflowTemplate {

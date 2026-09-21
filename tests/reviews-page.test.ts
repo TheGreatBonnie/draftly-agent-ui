@@ -28,6 +28,7 @@ function review(overrides: Partial<ReviewViewModel> = {}): ReviewViewModel {
     originalContentAvailable: false,
     evidence: [],
     evaluation: { overall_score: 94, dimensions: [], reasons: [], count: 1 },
+    pages: [],
     raw: {} as ReviewViewModel["raw"],
     ...overrides,
   };

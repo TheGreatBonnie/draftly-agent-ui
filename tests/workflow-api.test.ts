@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { setApiToken } from "../api/client.ts";
-import { createWorkflow, listWorkflows, respondToIntervention, runWorkflow } from "../api/workflows.ts";
+import { createWorkflow, getWorkflowRun, listWorkflows, respondToIntervention, runWorkflow } from "../api/workflows.ts";
+import { normalizePageResults } from "../lib/page-evaluations.ts";
 
 test("workflow API uses canonical endpoints and preserves encoded ids", async () => {
   const calls: Array<{ url: string; init?: RequestInit }> = [];
@@ -40,4 +41,71 @@ test("workflow API uses canonical endpoints and preserves encoded ids", async ()
     message: "Use the approved docs branch.",
     idempotency_key: "response-1",
   });
+});
+
+test("workflow run responses surface normalized page evaluation results", async () => {
+  const originalFetch = globalThis.fetch;
+  setApiToken("test-token");
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    run: {
+      id: "run-1",
+      definition_id: null,
+      source: "manual",
+      source_event_id: null,
+      event_type: null,
+      title: "Run",
+      repository: null,
+      actor: null,
+      target: null,
+      status: "completed",
+      current_stage: null,
+      stage_states: {},
+      input: null,
+      output: null,
+      error: null,
+      started_at: null,
+      completed_at: null,
+      created_at: null,
+      updated_at: null,
+      page_results: [
+        {
+          page_id: "docs/oauth.md",
+          path: "docs/oauth.md",
+          status: "passed",
+          version: 1,
+          attempts: 1,
+          score: 0.93,
+          failed_metrics: [],
+          feedback: [],
+          escalation_reason: null,
+        },
+      ],
+    },
+  }), { status: 200, headers: { "content-type": "application/json" } })) as typeof fetch;
+
+  try {
+    const detail = await getWorkflowRun("run-1");
+    const pages = normalizePageResults(detail.run.page_results);
+    assert.equal(pages.length, 1);
+    assert.equal(pages[0].path, "docs/oauth.md");
+    assert.equal(pages[0].status, "passed");
+    assert.equal(pages[0].score, 93);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("legacy run responses without page_results normalize to empty", async () => {
+  const originalFetch = globalThis.fetch;
+  setApiToken("test-token");
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    run: { id: "run-1", source: "manual", status: "completed", stage_states: {} },
+  }), { status: 200, headers: { "content-type": "application/json" } })) as typeof fetch;
+
+  try {
+    const detail = await getWorkflowRun("run-1");
+    assert.deepEqual(normalizePageResults(detail.run.page_results), []);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

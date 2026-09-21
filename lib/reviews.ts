@@ -5,6 +5,7 @@ import type {
   ReviewEvidenceItem,
   ReviewSummary,
 } from "../api/observability";
+import { normalizePageResults, type PageEvaluationSummary } from "./page-evaluations.ts";
 
 export interface ReviewViewModel {
   id: string;
@@ -30,6 +31,7 @@ export interface ReviewViewModel {
   originalContentAvailable: boolean;
   evidence: ReviewEvidenceItem[];
   evaluation: ReviewDisplayEvaluation;
+  pages: PageEvaluationSummary[];
   raw: ReviewSummary;
 }
 
@@ -205,6 +207,7 @@ export function toReviewViewModel(review: ReviewSummary): ReviewViewModel {
     originalContentAvailable: files.some((file) => file.originalContentAvailable),
     evidence,
     evaluation,
+    pages: normalizePageResults(display?.page_results),
     raw: review,
   };
 }

@@ -78,3 +78,36 @@ test("keeps absent detail values nullable", () => {
   assert.equal(facts.evidenceCount, 0);
   assert.equal(facts.dimensionCount, 0);
 });
+
+test("view model carries normalized page evaluation summaries from display", () => {
+  const view = toReviewViewModel({
+    ...review,
+    display: {
+      ...review.display!,
+      page_results: [
+        {
+          page_id: "docs/oauth.md",
+          path: "docs/oauth.md",
+          status: "awaiting_human_review",
+          version: 2,
+          attempts: 3,
+          score: 0.4,
+          failed_metrics: ["quality_score"],
+          feedback: ["Add a usage example."],
+          escalation_reason: "Exhausted automated attempts",
+        },
+      ],
+    },
+  });
+
+  assert.equal(view.pages.length, 1);
+  assert.equal(view.pages[0].pageId, "docs/oauth.md");
+  assert.equal(view.pages[0].status, "awaiting_human_review");
+  assert.equal(view.pages[0].attempts, 3);
+  assert.deepEqual(view.pages[0].failedMetrics, ["quality_score"]);
+});
+
+test("review without page_results normalizes pages to empty", () => {
+  const view = toReviewViewModel({ ...review, display: null, detail: null, pr: null });
+  assert.deepEqual(view.pages, []);
+});
