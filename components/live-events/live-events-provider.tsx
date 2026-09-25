@@ -9,6 +9,7 @@ const DASHBOARD_EVENT_TYPES = [
   "documentation:changed",
   "documentation:published",
   "review:completed",
+  "integration:changed",
 ];
 
 const LiveVersionContext = createContext(0);

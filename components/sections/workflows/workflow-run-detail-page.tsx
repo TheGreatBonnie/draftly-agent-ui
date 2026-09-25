@@ -12,11 +12,12 @@ import { PageEvaluationPanel } from "./page-evaluation-panel";
 import { SteeringInterventionPanel } from "./steering-intervention-panel";
 import { SteeringEventTimeline } from "./steering-event-timeline";
 
-export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: string; runId: string }) {
+export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: string | null; runId: string }) {
   const { data, error, isLoading, live, steps, artifacts, refresh } = useWorkflowRun(runId);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const run = data?.run;
+  const backHref = workflowId ? `/workflows/${encodeURIComponent(workflowId)}` : "/workflows";
 
   async function action(kind: "cancel" | "retry") {
     setBusy(true);
@@ -34,14 +35,14 @@ export function WorkflowRunDetailPage({ workflowId, runId }: { workflowId: strin
 
   if (isLoading && !run) return <div className="space-y-4"><Skeleton className="h-10 w-2/3" /><Skeleton className="h-80 w-full" /></div>;
   if (error && !run) return <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">Unable to load run: {error}</div>;
-  if (!run) return <EmptyState icon={<CircleAlert className="h-7 w-7" />} title="Run not found" description="This execution is unavailable in the current organization." action={<Link href={`/workflows/${encodeURIComponent(workflowId)}`}><Button>Back to workflow</Button></Link>} />;
+  if (!run) return <EmptyState icon={<CircleAlert className="h-7 w-7" />} title="Run not found" description="This execution is unavailable in the current organization." action={<Link href={backHref}><Button>Back to workflows</Button></Link>} />;
 
   const pendingInterventions = run.pending_interventions ?? [];
   const terminal = ["completed", "failed", "cancelled", "skipped"].includes(run.status);
   const pageEvaluations = normalizePageResults(run.page_results);
   return (
     <>
-      <div className="mb-3"><Link href={`/workflows/${encodeURIComponent(workflowId)}`} className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-brand"><ArrowLeft className="h-4 w-4" />Workflow</Link></div>
+      <div className="mb-3"><Link href={backHref} className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-brand"><ArrowLeft className="h-4 w-4" />{workflowId ? "Workflow" : "Workflows"}</Link></div>
       <PageHeader title={run.title || run.id} subtitle={`${run.repository || "No repository"} · ${run.actor || "Unknown actor"}`} actions={<><Badge tone={statusTone(run.status)}>{run.status}</Badge>{!terminal && run.status !== "pending_intervention" && <Button danger onClick={() => action("cancel")} disabled={busy}><Square className="h-4 w-4" />Cancel</Button>}{terminal && run.status !== "completed" && <Button onClick={() => action("retry")} disabled={busy}><RotateCcw className="h-4 w-4" />Retry</Button>}</>} />
       {actionError && <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">{actionError}</div>}
       {pendingInterventions.map((intervention) => <div className="mb-4" key={intervention.interrupt_id}><SteeringInterventionPanel intervention={intervention} runId={run.id} onResolved={refresh} /></div>)}

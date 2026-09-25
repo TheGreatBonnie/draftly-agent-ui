@@ -70,7 +70,7 @@ export interface CreateReviewerPayload {
 
 export interface UpdateReviewerPayload {
   name?: string;
-  email?: string;
+  email?: string | null;
   slack_user_id?: string;
   discord_user_id?: string;
   notify_slack?: boolean;

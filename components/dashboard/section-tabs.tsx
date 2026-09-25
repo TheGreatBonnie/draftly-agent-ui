@@ -27,7 +27,7 @@ export const sectionTabs = {
     { label: "Recently updated", href: "/documentation/recently-updated" },
   ],
   workflows: [
-    { label: "All workflows", href: "/workflows" },
+    { label: "Runs", href: "/workflows" },
     { label: "Active", href: "/workflows/active", count: 6 },
     { label: "Paused", href: "/workflows/paused" },
     { label: "Drafts", href: "/workflows/drafts" },

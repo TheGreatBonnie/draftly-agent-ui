@@ -52,6 +52,7 @@ export interface WorkflowRun {
   status: RunStatus;
   current_stage: string | null;
   stage_states: Record<string, unknown>;
+  stage_sequence?: string[];
   input: Record<string, unknown> | null;
   output: Record<string, unknown> | null;
   error: string | null;

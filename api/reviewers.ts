@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { request } from "./client.ts";
 import type {
   Reviewer,
   CreateReviewerPayload,
@@ -8,12 +8,13 @@ import type {
   SelfRegisterPayload,
 } from "./types";
 
-export async function listReviewers(): Promise<{ reviewers: Reviewer[] }> {
-  return request("/reviewers");
+export async function listReviewers(options: { activeOnly?: boolean } = {}): Promise<{ reviewers: Reviewer[] }> {
+  const query = options.activeOnly === undefined ? "" : `?active_only=${options.activeOnly}`;
+  return request(`/reviewers${query}`);
 }
 
 export async function getReviewer(id: string): Promise<Reviewer> {
-  return request(`/reviewers/${id}`);
+  return request(`/reviewers/${encodeURIComponent(id)}`);
 }
 
 export async function createReviewer(
@@ -29,7 +30,7 @@ export async function updateReviewer(
   id: string,
   payload: UpdateReviewerPayload,
 ): Promise<Reviewer> {
-  return request(`/reviewers/${id}`, {
+  return request(`/reviewers/${encodeURIComponent(id)}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });
@@ -38,7 +39,7 @@ export async function updateReviewer(
 export async function deleteReviewer(
   id: string,
 ): Promise<{ status: string }> {
-  return request(`/reviewers/${id}`, { method: "DELETE" });
+  return request(`/reviewers/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
 
 export async function registerSelf(

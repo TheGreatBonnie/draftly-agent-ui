@@ -1,214 +1,41 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Activity,
-  Cable,
-  FileText,
-  Github,
-  Gitlab,
-  Globe2,
-  Hash,
-  MessageSquare,
-  Plus,
-  Webhook,
-  Workflow,
-} from "lucide-react";
-import {
-  Badge,
-  Button,
-  Card,
-  IconTile,
-  PageHeader,
-  SearchBox,
-  SectionTitle,
-  Tabs,
-} from "@/components/dashboard/ui";
-import { integrations } from "@/lib/mock-data";
-const connected = integrations.slice(0, 4),
-  available = integrations.slice(4);
-const slug = (x: string) => x.toLowerCase().replaceAll(" ", "-");
-function IntegrationIcon({ name }: { name: string }) {
-  const Icon =
-    name === "GitHub"
-      ? Github
-      : name === "Slack"
-        ? Hash
-        : name === "Discord"
-          ? MessageSquare
-          : name === "Notion"
-            ? FileText
-            : name === "GitLab"
-              ? Gitlab
-              : name.includes("Webhook")
-                ? Webhook
-                : name.includes("Drive") || name.includes("SharePoint")
-                  ? FileText
-                  : name === "Sentry" || name === "Datadog"
-                    ? Activity
-                    : name === "Jira" || name === "Linear"
-                      ? Workflow
-                      : Globe2;
-  return <Icon className="h-5 w-5" />;
-}
+import { useOrganization } from "@clerk/nextjs";
+import { Plus, RefreshCw } from "lucide-react";
+import { Badge, Button, Card, IconTile, PageHeader, SearchBox } from "@/components/dashboard/ui";
+import { IntegrationIcon } from "@/components/sections/integrations/integration-icon";
+import { useIntegrations } from "@/hooks/use-integrations";
+import { integrationSummary, visibleProviders } from "@/lib/integrations";
+
+const healthLabel = { unknown: "Not checked", healthy: "Healthy", degraded: "Needs attention", error: "Access lost" } as const;
+
 export default function Page() {
-  return (
-    <>
-      <PageHeader
-        title="Integrations"
-        subtitle="Connect your tools and data sources to help Draftly understand your project, monitor changes, and keep documentation up to date."
-        actions={
-          <>
-            <Button>View docs ↗</Button>
-            <Link href="/integrations/add">
-              <Button primary>
-                <Plus className="h-4 w-4" />
-                Add integration
-              </Button>
-            </Link>
-          </>
-        }
-      />
-      <div className="grid gap-4 xl:grid-cols-[1fr_340px]">
-        <div className="space-y-4">
-          <Card>
-            <SectionTitle
-              icon={<Cable className="h-4 w-4" />}
-              title="Connected integrations"
-              subtitle="These tools are currently connected to your workspace."
-            />
-            <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
-              {connected.map((x, i) => (
-                <Card key={x} className="p-4 shadow-none">
-                  <div className="flex justify-between gap-2">
-                    <IconTile
-                      tone={
-                        i === 0
-                          ? "slate"
-                          : i === 1
-                            ? "green"
-                            : i === 2
-                              ? "violet"
-                              : "slate"
-                      }>
-                      <IntegrationIcon name={x} />
-                    </IconTile>
-                    <Badge tone="green">Connected</Badge>
-                  </div>
-                  <h3 className="mt-4 font-semibold">{x}</h3>
-                  <p className="mt-2 min-h-[54px] text-xs leading-5 text-slate-500">
-                    {x === "GitHub"
-                      ? "Monitor PRs, issues, and releases for documentation opportunities."
-                      : x === "Slack"
-                        ? "Ingest support and engineering conversations from your channels."
-                        : x === "Discord"
-                          ? "Monitor community discussions and help channels."
-                          : "Sync product docs, wikis, and knowledge bases."}
-                  </p>
-                  <Link href={`/integrations/${slug(x)}`}>
-                    <Button className="mt-4 w-full">Configure →</Button>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          </Card>
-          <Card>
-            <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="font-semibold">Available integrations</h3>
-                <p className="text-xs text-slate-500">
-                  Connect additional tools to bring more context to Draftly.
-                </p>
-              </div>
-              <SearchBox
-                className="w-full sm:w-64"
-                placeholder="Search integrations..."
-              />
-            </div>
-            <div className="px-4">
-              <Tabs
-                active="All"
-                items={[
-                  "All",
-                  "Code & Repositories",
-                  "Communication",
-                  "Documentation",
-                  "Project Management",
-                  "Other",
-                ]}
-              />
-            </div>
-            <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
-              {available.map((x, i) => (
-                <Card key={x} className="p-4 shadow-none">
-                  <IconTile
-                    tone={
-                      i % 3 === 0 ? "blue" : i % 3 === 1 ? "violet" : "cyan"
-                    }>
-                    <IntegrationIcon name={x} />
-                  </IconTile>
-                  <h3 className="mt-3 font-semibold">{x}</h3>
-                  <p className="mt-2 min-h-[48px] text-xs leading-5 text-slate-500">
-                    {x === "Custom Webhook"
-                      ? "Connect any tool via webhooks."
-                      : i % 3 === 0
-                        ? "Track project activity and product updates."
-                        : i % 3 === 1
-                          ? "Sync documentation and team knowledge."
-                          : "Monitor signals for documentation opportunities."}
-                  </p>
-                  <Link
-                    href={
-                      x === "Custom Webhook"
-                        ? "/integrations/add"
-                        : `/integrations/${slug(x)}`
-                    }>
-                    <Button primary={x !== "Custom Webhook"} className="mt-3">
-                      {x === "Custom Webhook" ? "View setup" : "Connect"}
-                    </Button>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          </Card>
-        </div>
-        <aside className="space-y-4">
-          <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 p-5">
-            <h3 className="text-lg font-semibold">Your ecosystem, connected</h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Draftly pulls context from your tools, understands changes, and
-              keeps documentation in sync.
-            </p>
-            <div className="grid-bg relative mt-5 h-52 rounded-xl">
-              <div className="absolute left-1/2 top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-2xl bg-white text-blue-600 shadow">
-                <FileText />
-              </div>
-              {[
-                [18, 20, "GitHub"],
-                [73, 20, "Slack"],
-                [10, 60, "Notion"],
-                [80, 60, "Discord"],
-                [35, 78, "Website"],
-                [63, 82, "Database"],
-              ].map(([l, t, n]) => (
-                <div
-                  key={String(n)}
-                  style={{ left: `${l}%`, top: `${t}%` }}
-                  className="absolute grid h-12 w-12 place-items-center rounded-xl bg-white shadow">
-                  <IntegrationIcon name={String(n)} />
-                </div>
-              ))}
-            </div>
-          </Card>
-          <Card className="bg-violet-50 p-5">
-            <h3 className="font-semibold">Need a custom integration?</h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Connect any system using the webhook API.
-            </p>
-            <Link href="/integrations/add">
-              <Button className="mt-4">Configure webhook →</Button>
-            </Link>
-          </Card>
-        </aside>
+  const { membership } = useOrganization();
+  const isAdmin = membership?.role === "org:admin";
+  const [search, setSearch] = useState("");
+  const { data, error, loading, refresh, orgId } = useIntegrations();
+  const connections = data?.connections ?? [];
+  const summary = integrationSummary(connections);
+  const providers = useMemo(() => visibleProviders(search), [search]);
+
+  return <>
+    <PageHeader title="Integrations" subtitle="Manage the tools connected to your organization." actions={<div className="flex gap-2"><Button onClick={refresh} ariaLabel="Refresh integrations"><RefreshCw className="h-4 w-4" /> Refresh</Button>{isAdmin && <Link href="/integrations/add"><Button primary><Plus className="h-4 w-4" /> Add integration</Button></Link>}</div>} />
+    {!orgId && !loading && <Card className="p-5 text-sm text-slate-600">Select an organization to view its integrations.</Card>}
+    {error && <Card className="mb-4 p-4 text-sm text-red-700"><p role="alert">{error}</p><Button onClick={refresh}>Retry</Button></Card>}
+    {orgId && <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-3" aria-label="Integration summary">
+        {[["Connected", summary.connected], ["Healthy", summary.healthy], ["Needs attention", summary.needsAttention]].map(([label, value]) => <Card key={label} className="p-4"><p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold">{loading && !data ? "—" : value}</p></Card>)}
       </div>
-    </>
-  );
+      <section aria-labelledby="active-connections-title">
+        <h2 id="active-connections-title" className="mb-3 text-lg font-semibold">Active connections</h2>
+        {loading && !data ? <Card className="p-6 text-sm text-slate-500">Loading connections…</Card> : connections.length === 0 ? <Card className="p-6 text-sm text-slate-500">No integrations connected yet.</Card> : <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{connections.map((item) => <Card key={`${item.provider}:${item.id}`} className="p-5"><div className="flex items-start justify-between"><IconTile><IntegrationIcon provider={item.provider} /></IconTile><Badge tone={item.health.status === "healthy" ? "green" : item.health.status === "unknown" ? "slate" : "amber"}>{healthLabel[item.health.status]}</Badge></div><h3 className="mt-4 font-semibold">{data?.providers.find((provider) => provider.id === item.provider)?.name} · {item.account_name}</h3><p className="mt-1 text-sm text-slate-500">{item.sources.length} available {item.provider === "github" ? "repositories" : item.provider === "discord" ? "channels" : "sources"}</p>{item.health.message && <p className="mt-2 text-xs text-amber-700">{item.health.message}</p>}<Link href={`/integrations/${item.provider}`} className="mt-4 inline-block text-sm font-medium text-blue-700 hover:underline">Manage connection →</Link></Card>)}</div>}
+      </section>
+      <section aria-labelledby="available-integrations-title">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><h2 id="available-integrations-title" className="text-lg font-semibold">Available integrations</h2><SearchBox value={search} onChange={setSearch} placeholder="Search integrations..." className="w-full sm:w-64" /></div>
+        {providers.length === 0 ? <Card className="p-6 text-sm text-slate-500">No integrations match your search.</Card> : <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{providers.map((provider) => <Card key={provider.id} className="p-5"><IconTile><IntegrationIcon provider={provider.id} /></IconTile><h3 className="mt-3 font-semibold">{provider.name}</h3><p className="mt-1 min-h-10 text-sm text-slate-500">{provider.description}</p><Link href={`/integrations/${provider.id}`} className="mt-4 inline-block text-sm font-medium text-blue-700 hover:underline">{connections.some((item) => item.provider === provider.id) ? "View connections" : isAdmin ? "Connect" : "Learn more"} →</Link></Card>)}</div>}
+      </section>
+    </div>}
+  </>;
 }

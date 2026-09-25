@@ -1,4 +1,47 @@
-import type { DefinitionStatus, WorkflowDefinition, WorkflowStage } from "../api/workflows";
+import type { DefinitionStatus, WorkflowDefinition, WorkflowRun, WorkflowStage } from "../api/workflows";
+
+export interface WorkflowRunRow {
+  id: string;
+  title: string;
+  repository: string;
+  trigger: string;
+  status: WorkflowRun["status"];
+  currentStage: string;
+  stages: WorkflowStage[];
+  createdAt: string | null;
+  href: string;
+}
+
+export function mergeWorkflowRunPages<T extends { id: string }>(first: T[], later: T[]): T[] {
+  const seen = new Set<string>();
+  return [...first, ...later].filter((run) => {
+    if (seen.has(run.id)) return false;
+    seen.add(run.id);
+    return true;
+  });
+}
+
+export function toWorkflowRunRow(run: WorkflowRun): WorkflowRunRow {
+  const sequence = run.stage_sequence ?? [];
+  const stages = sequence.map((key) => ({
+    key,
+    label: label(key),
+    status: String(run.stage_states?.[key] ?? "queued"),
+  }));
+  return {
+    id: run.id,
+    title: run.title || run.id,
+    repository: run.repository || "—",
+    trigger: run.event_type || run.source,
+    status: run.status,
+    currentStage: run.current_stage ? label(run.current_stage) : run.status === "queued" ? "Queued" : "—",
+    stages,
+    createdAt: run.created_at,
+    href: run.definition_id
+      ? `/workflows/${encodeURIComponent(run.definition_id)}/runs/${encodeURIComponent(run.id)}`
+      : `/workflows/runs/${encodeURIComponent(run.id)}`,
+  };
+}
 
 const STAGE_ORDER: Record<string, string[]> = {
   github_pr: ["analyze", "research", "write", "evaluate", "review", "deliver"],

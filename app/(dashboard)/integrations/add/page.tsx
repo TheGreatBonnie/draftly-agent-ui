@@ -1,145 +1,15 @@
 "use client";
-import { useState } from "react";
-import {
-  ArrowRight,
-  Cable,
-  CheckCircle2,
-  Github,
-  Hash,
-  MessageSquare,
-  NotepadText,
-} from "lucide-react";
-import {
-  Button,
-  Card,
-  IconTile,
-  PageHeader,
-  Progress,
-  Tabs,
-} from "@/components/dashboard/ui";
-const providers = [
-  [Github, "GitHub"],
-  [Hash, "Slack"],
-  [MessageSquare, "Discord"],
-  [NotepadText, "Notion"],
-  [Cable, "Custom Webhook"],
-] as const;
+
+import Link from "next/link";
+import { useOrganization } from "@clerk/nextjs";
+import { Card, IconTile, PageHeader } from "@/components/dashboard/ui";
+import { IntegrationIcon } from "@/components/sections/integrations/integration-icon";
+import { PROVIDERS } from "@/lib/integrations";
+
 export default function Page() {
-  const [step, setStep] = useState(0);
-  const [provider, setProvider] = useState("GitHub");
-  const stages = [
-    "Provider",
-    "Authorize",
-    "Select sources",
-    "Configure",
-    "Sync",
-  ];
-  return (
-    <>
-      <PageHeader
-        title="Add integration"
-        subtitle="Connect a mock source and configure what Draftly can ingest."
-      />
-      <Tabs active={stages[step]} items={stages} />
-      <div className="mx-auto mt-4 max-w-3xl">
-        <Card className="p-5">
-          {step === 0 && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {providers.map(([Icon, name]) => (
-                <button
-                  key={name}
-                  onClick={() => setProvider(name)}
-                  className={`flex items-center gap-3 rounded-xl border p-4 text-left ${provider === name ? "border-blue-500 bg-blue-50" : "border-slate-200"}`}>
-                  <IconTile>
-                    <Icon className="h-5 w-5" />
-                  </IconTile>
-                  <div>
-                    <div className="font-semibold">{name}</div>
-                    <div className="text-xs text-slate-500">
-                      Connect {name} to Draftly
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-          {step === 1 && (
-            <div className="py-10 text-center">
-              <IconTile size="lg" className="mx-auto">
-                <Cable className="h-7 w-7" />
-              </IconTile>
-              <h2 className="mt-4 font-semibold">Authorize {provider}</h2>
-              <p className="mt-2 text-sm text-slate-500">
-                This is a mock authorization step. No external credentials are
-                required.
-              </p>
-            </div>
-          )}
-          {step === 2 && (
-            <div className="space-y-2">
-              {["authly/api", "authly/sdk", "authly/docs"].map((x) => (
-                <label
-                  key={x}
-                  className="flex gap-3 rounded-xl border border-slate-200 p-3 text-sm">
-                  <input
-                    defaultChecked
-                    type="checkbox"
-                    className="accent-blue-600"
-                  />
-                  {x}
-                </label>
-              ))}
-            </div>
-          )}
-          {step === 3 && (
-            <div className="space-y-3">
-              {["Pull requests", "Issues", "Releases", "Pushes"].map((x) => (
-                <label
-                  key={x}
-                  className="flex justify-between rounded-xl border border-slate-200 p-3 text-sm">
-                  <span>{x}</span>
-                  <input
-                    defaultChecked
-                    type="checkbox"
-                    className="accent-blue-600"
-                  />
-                </label>
-              ))}
-            </div>
-          )}
-          {step === 4 && (
-            <div className="py-10 text-center">
-              <IconTile size="lg" tone="green" className="mx-auto">
-                <CheckCircle2 className="h-7 w-7" />
-              </IconTile>
-              <h2 className="mt-4 font-semibold">Connection ready</h2>
-              <p className="mt-2 text-sm text-slate-500">
-                Initial mock sync indexed 324 knowledge items.
-              </p>
-              <Progress value={100} tone="green" />
-            </div>
-          )}
-          <div className="mt-6 flex justify-between">
-            <Button
-              disabled={step === 0}
-              onClick={() => setStep(Math.max(0, step - 1))}>
-              Back
-            </Button>
-            <Button
-              primary
-              onClick={() =>
-                step < 4
-                  ? setStep(step + 1)
-                  : location.assign(
-                      `/integrations/${provider.toLowerCase().replaceAll(" ", "-")}`,
-                    )
-              }>
-              {step === 4 ? "Open integration" : "Continue"}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </>
-  );
+  const { membership } = useOrganization();
+  return <>
+    <PageHeader title="Add integration" subtitle="Choose a provider to connect to your organization." />
+    {membership?.role !== "org:admin" ? <Card className="p-6 text-sm text-slate-600">An organization admin can connect integrations.</Card> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{PROVIDERS.map((provider) => <Card key={provider.id} className="p-5"><IconTile><IntegrationIcon provider={provider.id} /></IconTile><h2 className="mt-4 font-semibold">{provider.name}</h2><p className="mt-2 min-h-12 text-sm text-slate-500">{provider.description}</p><Link href={`/integrations/${provider.id}`} className="mt-4 inline-block text-sm font-medium text-blue-700 hover:underline">Continue to {provider.name} →</Link></Card>)}</div>}
+  </>;
 }
