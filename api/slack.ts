@@ -1,5 +1,5 @@
-import { request } from "./client";
-import type { SlackInstallation } from "./types";
+import { request } from "./client.ts";
+import type { SlackInstallation } from "./types.ts";
 
 export async function getSlackInstallUrl(): Promise<{ install_url: string }> {
   return request("/slack/install-url");

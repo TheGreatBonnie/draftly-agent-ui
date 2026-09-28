@@ -1,10 +1,10 @@
-import { request } from "./client";
+import { request } from "./client.ts";
 import type {
   DiscordChannel,
   DiscordInviteUrl,
   DiscordStatus,
   DiscordTriggerChannels,
-} from "./types";
+} from "./types.ts";
 
 export async function getDiscordInviteUrl(): Promise<DiscordInviteUrl> {
   return request<DiscordInviteUrl>("/discord/invite-url");
