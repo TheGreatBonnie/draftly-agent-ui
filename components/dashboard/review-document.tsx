@@ -79,26 +79,41 @@ export default function ReviewDocument({
   originalContent,
   path,
   proposedContent,
+  selectedPath,
+  onSelectedPathChange,
 }: {
   files?: ReviewFileViewModel[];
   originalContent?: string | null;
   path?: string | null;
   proposedContent?: string | null;
+  /** Path of the file to show. Defaults to the first file. */
+  selectedPath?: string | null;
+  /**
+   * Fires when the reviewer picks a different file, so a parent can drive
+   * sibling UI (e.g. the evaluation ring) off the same selection.
+   */
+  onSelectedPathChange?: (path: string) => void;
 }) {
   const [view, setView] = useState<ViewMode>("rendered");
   const normalizedFiles = files?.length
     ? files
-    : [{
-        path: path ?? "Generated document",
-        action: "update",
-        originalContent: originalContent ?? null,
-        proposedContent: proposedContent ?? "",
-        originalContentAvailable: originalContent !== null && originalContent !== undefined,
-      } satisfies ReviewFileViewModel];
-  const [selectedIndex, setSelectedIndex] = useState(0);
+    : [
+        {
+          path: path ?? "Generated document",
+          action: "update",
+          originalContent: originalContent ?? null,
+          proposedContent: proposedContent ?? "",
+          originalContentAvailable:
+            originalContent !== null && originalContent !== undefined,
+        } satisfies ReviewFileViewModel,
+      ];
+  const selectedIndex = Math.max(
+    0,
+    normalizedFiles.findIndex((file) => file.path === selectedPath),
+  );
   const selectedFile = normalizedFiles[selectedIndex] ?? normalizedFiles[0];
   const currentOriginal = selectedFile.originalContentAvailable
-    ? selectedFile.originalContent ?? ""
+    ? (selectedFile.originalContent ?? "")
     : "";
   const currentProposed = selectedFile.proposedContent ?? "";
   const diff = useMemo(
@@ -119,12 +134,22 @@ export default function ReviewDocument({
                 aria-label="Review file"
                 className="max-w-[260px] rounded border border-border bg-surface px-2 py-1 font-mono text-xs text-foreground"
                 value={selectedIndex}
-                onChange={(event) => setSelectedIndex(Number(event.target.value))}
-              >
-                {normalizedFiles.map((file, index) => <option key={`${file.path}-${index}`} value={index}>{file.path}</option>)}
+                onChange={(event) => {
+                  const next = normalizedFiles[Number(event.target.value)];
+                  if (next) onSelectedPathChange?.(next.path);
+                }}>
+                {normalizedFiles.map((file, index) => (
+                  <option key={`${file.path}-${index}`} value={index}>
+                    {file.path}
+                  </option>
+                ))}
               </select>
             </label>
-          ) : <div className="truncate font-mono text-xs font-medium text-foreground">{selectedFile.path}</div>}
+          ) : (
+            <div className="truncate font-mono text-xs font-medium text-foreground">
+              {selectedFile.path}
+            </div>
+          )}
           <div className="mt-1 text-[11px] text-foreground-muted">
             <span className="font-semibold text-success">+{additions}</span>
             <span className="ml-2 font-semibold text-danger">-{deletions}</span>
@@ -133,8 +158,7 @@ export default function ReviewDocument({
         <div
           aria-label="Document view"
           className="flex rounded-lg border border-border bg-surface p-1"
-          role="tablist"
-        >
+          role="tablist">
           {views.map(({ id, icon: Icon, label }) => (
             <button
               aria-controls={`review-document-${id}`}
@@ -148,8 +172,7 @@ export default function ReviewDocument({
               key={id}
               onClick={() => setView(id)}
               role="tab"
-              type="button"
-            >
+              type="button">
               <Icon aria-hidden="true" className="h-3.5 w-3.5" />
               {label}
             </button>
@@ -161,26 +184,71 @@ export default function ReviewDocument({
         aria-labelledby={`review-document-tab-${view}`}
         className="min-w-0 max-w-full"
         id={`review-document-${view}`}
-        role="tabpanel"
-      >
+        role="tabpanel">
         {view === "rendered" && (
-            <article className="prose prose-slate max-w-none bg-surface px-5 py-6 prose-headings:scroll-mt-24 prose-headings:text-foreground prose-p:text-foreground-secondary prose-a:text-brand prose-blockquote:border-brand prose-blockquote:text-foreground-secondary prose-code:text-foreground prose-pre:bg-code prose-pre:text-code-foreground dark:prose-invert md:px-7">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentProposed}</ReactMarkdown>
+          <article className="prose prose-slate max-w-none bg-surface px-5 py-6 prose-headings:scroll-mt-24 prose-headings:text-foreground prose-p:text-foreground-secondary prose-a:text-brand prose-blockquote:border-brand prose-blockquote:text-foreground-secondary prose-code:text-foreground prose-pre:bg-code prose-pre:text-code-foreground dark:prose-invert md:px-7">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {currentProposed}
+            </ReactMarkdown>
           </article>
         )}
 
-        {view === "diff" && (
-          selectedFile.originalContentAvailable ? <div className="max-h-[640px] min-w-0 max-w-full overflow-auto bg-surface font-mono text-xs leading-6">
-            {diff.map((line, index) => {
-              const tone = line.type === "added" ? "bg-success-soft text-foreground" : line.type === "removed" ? "bg-danger-soft text-foreground" : "text-foreground-secondary";
-              const marker = line.type === "added" ? "+" : line.type === "removed" ? "-" : " ";
-              return <div className={`grid min-w-max grid-cols-[42px_42px_24px_minmax(0,1fr)] ${tone}`} key={`${index}-${line.type}`}><span className="select-none border-r border-border px-2 text-right text-foreground-muted">{line.oldLine ?? ""}</span><span className="select-none border-r border-border px-2 text-right text-foreground-muted">{line.newLine ?? ""}</span><span className="select-none text-center text-foreground-muted">{marker}</span><span className="whitespace-pre pr-4">{line.content || " "}</span></div>;
-            })}
-          </div> : <div className="space-y-3 bg-surface p-5 text-sm text-foreground-secondary"><p className="font-medium text-foreground">Original content unavailable</p><p>The proposed document is shown below; a line-by-line diff is not available for this file.</p><pre className="max-h-[560px] overflow-auto rounded-lg bg-code p-4 text-xs leading-6 text-code-foreground">{currentProposed}</pre></div>
-        )}
+        {view === "diff" &&
+          (selectedFile.originalContentAvailable ? (
+            <div className="max-h-[640px] min-w-0 max-w-full overflow-auto bg-surface font-mono text-xs leading-6">
+              {diff.map((line, index) => {
+                const tone =
+                  line.type === "added"
+                    ? "bg-success-soft text-foreground"
+                    : line.type === "removed"
+                      ? "bg-danger-soft text-foreground"
+                      : "text-foreground-secondary";
+                const marker =
+                  line.type === "added"
+                    ? "+"
+                    : line.type === "removed"
+                      ? "-"
+                      : " ";
+                return (
+                  <div
+                    className={`grid min-w-max grid-cols-[42px_42px_24px_minmax(0,1fr)] ${tone}`}
+                    key={`${index}-${line.type}`}>
+                    <span className="select-none border-r border-border px-2 text-right text-foreground-muted">
+                      {line.oldLine ?? ""}
+                    </span>
+                    <span className="select-none border-r border-border px-2 text-right text-foreground-muted">
+                      {line.newLine ?? ""}
+                    </span>
+                    <span className="select-none text-center text-foreground-muted">
+                      {marker}
+                    </span>
+                    <span className="whitespace-pre pr-4">
+                      {line.content || " "}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-3 bg-surface p-5 text-sm text-foreground-secondary">
+              <p className="font-medium text-foreground">
+                Original content unavailable
+              </p>
+              <p>
+                The proposed document is shown below; a line-by-line diff is not
+                available for this file.
+              </p>
+              <pre className="max-h-[560px] overflow-auto rounded-lg bg-code p-4 text-xs leading-6 text-code-foreground">
+                {currentProposed}
+              </pre>
+            </div>
+          ))}
 
         {view === "source" && (
-          <pre aria-label="Raw Markdown source" className="max-h-[640px] min-w-0 max-w-full overflow-auto bg-code p-5 text-xs leading-6 text-code-foreground" tabIndex={0}>
+          <pre
+            aria-label="Raw Markdown source"
+            className="max-h-[640px] min-w-0 max-w-full overflow-auto bg-code p-5 text-xs leading-6 text-code-foreground"
+            tabIndex={0}>
             <code>{currentProposed}</code>
           </pre>
         )}

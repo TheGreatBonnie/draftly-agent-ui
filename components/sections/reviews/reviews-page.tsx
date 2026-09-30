@@ -28,6 +28,7 @@ import {
   Skeleton,
 } from "@/components/dashboard/ui";
 import { useReviews } from "@/hooks/use-reviews";
+import { pageScoreLabel } from "@/lib/page-evaluations";
 import { filterReviewItems, reviewPageInterval } from "@/lib/reviews-page";
 import { toReviewViewModel, type ReviewViewModel } from "@/lib/reviews";
 
@@ -68,13 +69,18 @@ function RiskBadge({ risk }: { risk: string | null }) {
 
 function ReviewRow({ review, index }: { review: ReviewViewModel; index: number }) {
   const accent = reviewAccent[index % reviewAccent.length];
-  const scoreTone = review.score === null
+  // The score the column shows: the page average for documentation reviews,
+  // the legacy overall score for reviews that carry one. Null renders as an
+  // em dash rather than 0%, since an unevaluated review is not a failing one.
+  const score = review.pageScore;
+  const scoreTone = score === null
     ? { text: "text-foreground-muted", fill: "bg-slate-300" }
-    : review.score < 70
+    : score < 70
       ? { text: "text-rose-600", fill: "bg-rose-500" }
-      : review.score < 80
+      : score < 80
         ? { text: "text-amber-600", fill: "bg-amber-500" }
         : { text: "text-emerald-600", fill: "bg-emerald-500" };
+  const { scored, total } = review.pageScoreCoverage;
   const TypeIcon = review.type?.toLowerCase() === "create" ? FilePlus2 : FileCheck2;
   return (
     <div className="grid min-h-[106px] gap-3 px-5 py-3.5 lg:grid-cols-[minmax(330px,2.35fr)_minmax(135px,1fr)_minmax(125px,.9fr)_minmax(155px,1.15fr)_minmax(92px,.72fr)_minmax(76px,.62fr)_minmax(105px,.8fr)_24px] lg:items-center">
@@ -99,9 +105,17 @@ function ReviewRow({ review, index }: { review: ReviewViewModel; index: number }
         <span className="max-w-[90px] leading-[18px]">{review.type ?? "Unknown"}</span>
       </div>
       <div className="min-w-0">
-        <div className={`text-base font-semibold ${scoreTone.text}`}>{review.score === null ? "—" : `${Math.round(review.score)}%`}</div>
-        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className={`h-full rounded-full ${scoreTone.fill}`} style={{ width: `${review.score ?? 0}%` }} /></div>
-        <div className="mt-1.5 text-[10px] text-foreground-muted">{review.evaluationCount === null ? "—" : `${review.evaluationCount} evaluations`}</div>
+        <div className={`text-base font-semibold ${scoreTone.text}`}>{pageScoreLabel(score)}</div>
+        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className={`h-full rounded-full ${scoreTone.fill}`} style={{ width: `${score ?? 0}%` }} /></div>
+        <div className="mt-1.5 text-[10px] text-foreground-muted">
+          {total > 0
+            ? scored === total
+              ? `${scored} page${scored === 1 ? "" : "s"}`
+              : `${scored} of ${total} pages`
+            : review.evaluationCount === null
+              ? "—"
+              : `${review.evaluationCount} evaluations`}
+        </div>
       </div>
       <RiskBadge risk={review.risk} />
       <span className="text-xs text-foreground-muted">{formatUpdated(review.updatedAt)}</span>

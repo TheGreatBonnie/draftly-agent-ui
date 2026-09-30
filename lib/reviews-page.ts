@@ -25,9 +25,13 @@ export function filterReviewItems(
     if (filters.repository && review.repository !== filters.repository) return false;
     if (filters.type && review.type !== filters.type) return false;
     if (filters.risk && review.risk?.toLowerCase() !== filters.risk.toLowerCase()) return false;
-    if (filters.score === "below80" && (review.score === null || review.score >= 80)) return false;
-    if (filters.score === "80to89" && (review.score === null || review.score < 80 || review.score >= 90)) return false;
-    if (filters.score === "90plus" && (review.score === null || review.score < 90)) return false;
+    // Filter on the score the column actually shows. Documentation reviews have
+    // no legacy `score` and carry the page average in `pageScore`, so keying off
+    // `score` alone matched nothing for every real review.
+    const score = review.pageScore;
+    if (filters.score === "below80" && (score === null || score >= 80)) return false;
+    if (filters.score === "80to89" && (score === null || score < 80 || score >= 90)) return false;
+    if (filters.score === "90plus" && (score === null || score < 90)) return false;
     return true;
   });
 }

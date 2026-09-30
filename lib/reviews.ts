@@ -5,7 +5,13 @@ import type {
   ReviewEvidenceItem,
   ReviewSummary,
 } from "../api/observability";
-import { normalizePageResults, type PageEvaluationSummary } from "./page-evaluations.ts";
+import {
+  averagePageScore,
+  normalizePageResults,
+  pageScoreCoverage as computePageScoreCoverage,
+  type PageEvaluationSummary,
+  type PageScoreCoverage,
+} from "./page-evaluations.ts";
 
 export interface ReviewViewModel {
   id: string;
@@ -18,6 +24,10 @@ export interface ReviewViewModel {
   type: string | null;
   risk: string | null;
   score: number | null;
+  /** The score the AI Evaluation column should show. Null means "no data". */
+  pageScore: number | null;
+  /** How many pages were scored, out of how many the review touched. */
+  pageScoreCoverage: PageScoreCoverage;
   evaluationCount: number | null;
   status: string;
   rawStatus: string;
@@ -149,6 +159,7 @@ export function toReviewViewModel(review: ReviewSummary): ReviewViewModel {
   const pr = record(review.pr);
   const files = normalizeFiles(display, document);
   const evaluation = normalizeEvaluation(display, detail);
+  const pages = normalizePageResults(display?.page_results);
   const repository = text(
     display?.repository,
     document.repository,
@@ -194,6 +205,11 @@ export function toReviewViewModel(review: ReviewSummary): ReviewViewModel {
     type: text(display?.change_type, document.change_type, files[0]?.action),
     risk: text(display?.risk),
     score: evaluation.overall_score,
+    // Documentation reviews write no legacy `evaluation.overall_score`, so the
+    // page average is the only number available for the AI Evaluation column.
+    // A real legacy score still wins when present.
+    pageScore: evaluation.overall_score ?? averagePageScore(pages),
+    pageScoreCoverage: computePageScoreCoverage(pages),
     evaluationCount: evaluation.count,
     status: displayStatus(rawStatus),
     rawStatus,
@@ -207,7 +223,7 @@ export function toReviewViewModel(review: ReviewSummary): ReviewViewModel {
     originalContentAvailable: files.some((file) => file.originalContentAvailable),
     evidence,
     evaluation,
-    pages: normalizePageResults(display?.page_results),
+    pages,
     raw: review,
   };
 }

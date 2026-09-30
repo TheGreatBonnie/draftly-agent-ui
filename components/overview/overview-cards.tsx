@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Activity, Bot, Database, FileCheck2, FileText, GitPullRequest, SearchCheck, ServerCog, Sparkles, Star, Workflow } from "lucide-react";
 import type { OverviewSnapshot } from "@/api/overview";
-import { Badge, Card, IconTile, MetricCard, Progress, SectionTitle, TinyLink } from "@/components/dashboard/ui";
+import { Badge, Card, IconTile, MetricCard, Progress, ScoreRing, SectionTitle, TinyLink } from "@/components/dashboard/ui";
 import { formatRelativeTime, formatScore, formatTrend, scoreToProgress, statusTone } from "@/lib/overview";
 
 const systemIcons = [Bot, Database, SearchCheck, ServerCog];
@@ -24,27 +24,19 @@ export function RecentChanges({ items }: { items: OverviewSnapshot["recent_chang
 export function EvaluationResults({ evaluation }: { evaluation: OverviewSnapshot["evaluation"] }) {
   const trend = formatTrend(evaluation.trend);
   const tones = ["green", "blue", "violet", "amber", "green"] as const;
-  const radius = 51;
-  const circumference = 2 * Math.PI * radius;
   const progress = scoreToProgress(evaluation.average_score);
   const scoreLabel = formatScore(evaluation.average_score);
 
   return <Card>
     <SectionTitle icon={<FileCheck2 className="h-4 w-4" />} title="Evaluation results" subtitle="Quality signals from recent runs" action={<TinyLink href="/evaluations">View all</TinyLink>} />
     <div className="grid gap-5 p-4 sm:grid-cols-[120px_minmax(0,1fr)] sm:items-center">
-      <div role="img" aria-label={`Average evaluation score: ${scoreLabel}`} className="relative mx-auto h-28 w-28 shrink-0">
-        <svg aria-hidden="true" className="h-full w-full -rotate-90" viewBox="0 0 112 112">
-          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="9" className="text-surface-subtle" />
-          <circle cx="56" cy="56" r={radius} fill="none" stroke="currentColor" strokeWidth="9" strokeLinecap="round" className="text-success transition-[stroke-dashoffset] duration-500" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - progress)} />
-        </svg>
-        <div className="absolute inset-0 grid place-items-center px-2 text-center">
-          <div className="flex min-w-0 flex-col items-center gap-1">
-            <strong className="whitespace-nowrap text-xl leading-none tabular-nums">{scoreLabel}</strong>
-            <span className="text-[9px] leading-3 text-foreground-muted">Average score</span>
-            {trend && <Badge className="px-1.5 py-0.5 text-[10px] leading-3" tone={evaluation.trend !== null && evaluation.trend >= 0 ? "green" : "rose"}>{trend}</Badge>}
-          </div>
+      <ScoreRing progress={progress} ariaLabel={`Average evaluation score: ${scoreLabel}`}>
+        <div className="flex min-w-0 flex-col items-center gap-1">
+          <strong className="whitespace-nowrap text-xl leading-none tabular-nums">{scoreLabel}</strong>
+          <span className="text-[9px] leading-3 text-foreground-muted">Average score</span>
+          {trend && <Badge className="px-1.5 py-0.5 text-[10px] leading-3" tone={evaluation.trend !== null && evaluation.trend >= 0 ? "green" : "rose"}>{trend}</Badge>}
         </div>
-      </div>
+      </ScoreRing>
       <div className="grid min-w-0 gap-3">
         {evaluation.dimensions.length === 0 ? <p className="text-sm text-foreground-muted">No evaluation dimensions recorded yet.</p> : evaluation.dimensions.map(({ name, value }, index) => <div key={name}>
           <div className="mb-1 flex items-center justify-between gap-3 text-xs leading-5">

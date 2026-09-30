@@ -15,6 +15,8 @@ function review(overrides: Partial<ReviewViewModel> = {}): ReviewViewModel {
     type: "update",
     risk: "medium",
     score: 94,
+    pageScore: 94,
+    pageScoreCoverage: { scored: 0, total: 0 },
     evaluationCount: 1,
     status: "Pending",
     rawStatus: "pending",
@@ -44,6 +46,7 @@ test("filters review rows by search, repository, type, risk, and score", () => {
       type: "create",
       risk: "high",
       score: 72,
+      pageScore: 72,
     }),
   ];
 
@@ -54,6 +57,33 @@ test("filters review rows by search, repository, type, risk, and score", () => {
   assert.deepEqual(
     filterReviewItems(rows, { type: "create", risk: "high", score: "below80" }).map((r) => r.id),
     ["review-2"],
+  );
+});
+
+test("the score filter works for reviews scored from pages, not just legacy scores", () => {
+  // Documentation reviews have `score: null` and carry their number in
+  // `pageScore`. Filtering on `score` alone matched nothing for every real
+  // review, so the "Below 80%" dropdown silently returned an empty list.
+  const rows = [
+    // A page-scored review: legacy score absent, page average 72.
+    review({ id: "page-scored-low", score: null, pageScore: 72 }),
+    review({ id: "page-scored-high", score: null, pageScore: 95 }),
+    review({ id: "page-scored-mid", score: null, pageScore: 85 }),
+    // Unscored in both places: must not match any score bucket.
+    review({ id: "unscored", score: null, pageScore: null }),
+  ];
+
+  assert.deepEqual(
+    filterReviewItems(rows, { score: "below80" }).map((r) => r.id),
+    ["page-scored-low"],
+  );
+  assert.deepEqual(
+    filterReviewItems(rows, { score: "80to89" }).map((r) => r.id),
+    ["page-scored-mid"],
+  );
+  assert.deepEqual(
+    filterReviewItems(rows, { score: "90plus" }).map((r) => r.id),
+    ["page-scored-high"],
   );
 });
 

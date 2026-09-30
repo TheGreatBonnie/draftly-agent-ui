@@ -4,3 +4,4 @@ export * from "./badge";
 export * from "./forms";
 export * from "./tabs";
 export * from "./feedback";
+export * from "./score-ring";
