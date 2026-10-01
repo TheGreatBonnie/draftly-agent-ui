@@ -23,7 +23,7 @@ import {
 } from "@/components/dashboard/ui";
 import { useReview } from "@/hooks/use-review";
 import { toReviewViewModel } from "@/lib/reviews";
-import { PageEvaluationCard } from "@/components/sections/reviews/page-evaluation-card";
+import { PageEvaluationPanel } from "@/components/sections/workflows/page-evaluation-panel";
 
 function statusTone(status: string): "green" | "rose" | "amber" | "blue" {
   if (status === "Approved") return "green";
@@ -214,7 +214,7 @@ export function ReviewDetailPage({ id }: { id: string }) {
           </Card>
         </div>
         <div className="min-w-0 space-y-4">
-          <PageEvaluationCard pages={review.pages} selectedPath={selectedFilePath} />
+          <PageEvaluationPanel pages={review.pages} selectedPath={selectedFilePath} />
           <Card>
             <SectionTitle title="Evidence" />
             <div className="divide-y divide-border p-4">
