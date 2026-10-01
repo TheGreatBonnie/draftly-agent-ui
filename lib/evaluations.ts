@@ -2,7 +2,7 @@ import type { EvaluationStatus } from "../api/evaluations.ts";
 
 export interface EvaluationTrendPoint {
   date: string;
-  average_score: number;
+  average_score: number | null;
   run_count: number;
 }
 
@@ -33,9 +33,9 @@ export function buildEvaluationTrendDays(
     const point = byDate.get(date);
     return {
       date,
-      average_score: point
-        ? Math.max(0, Math.min(100, point.average_score))
-        : null,
+      average_score: point?.average_score == null
+        ? null
+        : Math.max(0, Math.min(100, point.average_score)),
       run_count: point?.run_count ?? 0,
     };
   });
