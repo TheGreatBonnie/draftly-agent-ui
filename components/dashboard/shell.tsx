@@ -29,8 +29,10 @@ import {
   useOrganization,
   useUser,
 } from "@clerk/nextjs";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/components/dashboard/theme-provider";
+import { useReviews } from "@/hooks/use-reviews";
+import { pendingReviewsBadge, type NavBadge } from "@/lib/nav-badges";
 
 const nav = [
   ["Overview", "/overview", Grid2X2],
@@ -65,9 +67,11 @@ function Logo() {
 function Navigation({
   path,
   onNavigate,
+  reviewsBadge,
 }: {
   path: string;
   onNavigate?: () => void;
+  reviewsBadge?: NavBadge | null;
 }) {
   return (
     <nav aria-label="Primary navigation" className="space-y-1 px-3">
@@ -82,10 +86,12 @@ function Navigation({
             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${active ? "bg-blue-600 text-white shadow-sm" : "text-foreground-secondary hover:bg-surface-subtle"}`}>
             <Icon aria-hidden="true" className="h-[18px] w-[18px]" />
             <span>{label}</span>
-            {label === "Reviews" && (
+            {label === "Reviews" && reviewsBadge && (
               <span
+                aria-label={reviewsBadge.label}
+                aria-live="polite"
                 className={`ml-auto rounded-full px-2 py-0.5 text-[11px] ${active ? "bg-surface text-foreground" : "bg-surface-subtle text-foreground-muted"}`}>
-                12
+                {reviewsBadge.count}
               </span>
             )}
           </Link>
@@ -210,6 +216,12 @@ export default function Shell({ children }: { children: ReactNode }) {
   const [command, setCommand] = useState(false);
   const [read, setRead] = useState(false);
   const notificationRef = useDismissibleMenu(() => setNotifications(false));
+  // Counts are org-wide on the backend (`review_count_summary` ignores the
+  // status filter), so `limit: 1` keeps the payload to one item while still
+  // returning the full `counts` object. Refreshes on review SSE + 30s poll.
+  const reviewOptions = useMemo(() => ({ status: "pending", limit: 1 }), []);
+  const { data: reviewQueue } = useReviews(reviewOptions);
+  const reviewsBadge = pendingReviewsBadge(reviewQueue);
   const displayName = userLoaded
     ? [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
       user?.primaryEmailAddress?.emailAddress ||
@@ -225,7 +237,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         <div className="flex h-20 items-center px-5">
           <Logo />
         </div>
-        <Navigation path={path} />
+        <Navigation path={path} reviewsBadge={reviewsBadge} />
         <div className="mt-auto px-5 pb-4 pt-8">
           <Link
             href="/system"
@@ -289,7 +301,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                 <X aria-hidden="true" className="h-5 w-5" />
               </button>
             </div>
-            <Navigation path={path} onNavigate={() => setMobile(false)} />
+            <Navigation path={path} onNavigate={() => setMobile(false)} reviewsBadge={reviewsBadge} />
           </aside>
         </div>
       )}
