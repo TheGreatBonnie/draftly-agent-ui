@@ -13,10 +13,7 @@ export const sectionTabs = {
   ],
   evaluations: [
     { label: "Overview", href: "/evaluations" },
-    { label: "Runs", href: "/evaluations/runs" },
-    { label: "Test cases", href: "/evaluations/test-cases" },
-    { label: "Datasets", href: "/evaluations/datasets" },
-    { label: "Evaluators", href: "/evaluations/evaluators" },
+    { label: "Pages", href: "/evaluations/pages" },
     { label: "Trends", href: "/evaluations/trends" },
   ],
   documentation: [
