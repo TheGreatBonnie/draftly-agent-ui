@@ -70,6 +70,7 @@ export function statusTone(status: string): CardTone {
       return "green";
     case "queued":
     case "pending":
+    case "needs review":
     case "scheduled":
       return "amber";
     case "failed":

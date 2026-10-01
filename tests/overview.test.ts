@@ -46,6 +46,7 @@ test("maps backend statuses to semantic card tones", () => {
   assert.equal(statusTone("queued"), "amber");
   assert.equal(statusTone("failed"), "rose");
   assert.equal(statusTone("unknown"), "violet");
+  assert.equal(statusTone("Needs review"), "amber");
 });
 
 test("keeps pending interventions distinct from review attention", () => {

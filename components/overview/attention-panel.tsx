@@ -10,7 +10,7 @@ export function AttentionPanel({ attention }: { attention: OverviewSnapshot["att
   const items: AttentionItem[] = [
     { title: `${attention.pending_reviews} reviews pending`, subtitle: `${attention.high_risk_reviews} high risk`, href: "/reviews/pending", tone: "rose", Icon: FileCheck2 },
     { title: `${attention.pending_interventions} interventions pending`, subtitle: attention.pending_interventions ? "Human decision required" : "No paused agent actions", href: "/workflows?status=pending_intervention", tone: "rose", Icon: ShieldAlert },
-    { title: `${attention.failed_evaluations} failed evaluations`, subtitle: attention.failed_evaluations ? "Needs investigation" : "No failed runs", href: "/evaluations/runs", tone: "amber", Icon: CircleAlert },
+    { title: `${attention.failed_evaluations} failed evaluations`, subtitle: attention.failed_evaluations ? "Needs investigation" : "No failed runs", href: "/evaluations/pages", tone: "amber", Icon: CircleAlert },
     { title: `${attention.integration_issues} data source issue${attention.integration_issues === 1 ? "" : "s"}`, subtitle: attention.integration_issues ? "Check connected integrations" : "All sources connected", href: "/integrations", tone: "violet", Icon: Database },
     { title: `${attention.stale_documentation} stale documentation area${attention.stale_documentation === 1 ? "" : "s"}`, subtitle: "No updates in 30+ days", href: "/documentation/outdated", tone: "blue", Icon: FileText },
   ];

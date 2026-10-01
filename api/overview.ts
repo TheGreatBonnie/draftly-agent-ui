@@ -24,7 +24,7 @@ export interface OverviewSnapshot {
     agents_total: number;
     data_sources_connected: number;
     data_sources_total: number;
-    evaluations_status: "Running" | "Idle" | "Failed" | "Unknown";
+    evaluations_status: "Running" | "Idle" | "Failed" | "Unknown" | "Needs review";
     scheduler_status: "Healthy" | "Idle" | "Unavailable";
   };
   recent_changes: Array<{

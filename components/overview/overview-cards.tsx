@@ -13,7 +13,7 @@ export function SystemPulse({ system, integrationIssues }: { system: OverviewSna
     { label: "Evaluations", value: system.evaluations_status },
     { label: "Scheduler", value: system.scheduler_status },
   ];
-  const hasIssues = integrationIssues > 0 || system.evaluations_status === "Failed" || system.scheduler_status === "Unavailable";
+  const hasIssues = integrationIssues > 0 || system.evaluations_status === "Failed" || system.evaluations_status === "Needs review" || system.scheduler_status === "Unavailable";
   return <Card><SectionTitle icon={<Activity className="h-4 w-4" />} title="System pulse" action={<Badge tone={hasIssues ? "rose" : "green"}>● {hasIssues ? "Needs attention" : "All systems operational"}</Badge>} /><div className="grid gap-2 p-4 sm:grid-cols-2 md:grid-cols-4">{items.map(({ label, value }, index) => { const Icon = systemIcons[index]; const tone = statusTone(value); return <div key={label} className="rounded-xl border border-border p-3"><Icon aria-hidden="true" className="h-4 w-4 text-brand" /><div className="mt-2 text-sm font-medium">{label}</div><div className={`mt-1 text-xs ${tone === "rose" ? "text-danger" : tone === "amber" ? "text-warning" : "text-success"}`}>● {value}</div></div>; })}</div></Card>;
 }
 
