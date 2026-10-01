@@ -13,9 +13,12 @@ export function useDashboardEvents(handlers: Record<string, EventHandler>) {
   }, [handlers]);
 
   useEffect(() => {
+    const apiOrigin = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
     const stream = createDashboardEventStream({
       getToken: getApiToken,
       handlers: () => handlersRef.current,
+      ticketBaseUrl: "/api",
+      streamBaseUrl: apiOrigin ? `${apiOrigin}/api` : "/api",
     });
     void stream.connect();
 

@@ -18,6 +18,11 @@ Knowledge source cards represent persisted provenance evidence, not whether an i
 
 ## Run
 
+Copy `.env.example` to `.env.local` and set the Clerk values. `API_URL` is the
+server-side target for the Next.js `/api` rewrite. In production,
+`NEXT_PUBLIC_API_URL` sends long-lived SSE connections directly to Render while
+the short authenticated ticket request remains same-origin.
+
 ```bash
 npm install
 npm run dev

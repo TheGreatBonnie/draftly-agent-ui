@@ -24,6 +24,8 @@ interface DashboardEventStreamOptions {
   fetchTicket?(token: string): Promise<TicketResponse>;
   createEventSource?(url: string): DashboardEventSource;
   handlers: Record<string, DashboardEventHandler> | (() => Record<string, DashboardEventHandler>);
+  ticketBaseUrl?: string;
+  streamBaseUrl?: string;
   reconnectDelayMs?: number;
   schedule?(callback: () => void, delayMs: number): unknown;
   cancelSchedule?(handle: unknown): void;
@@ -37,8 +39,10 @@ export interface DashboardEventStream {
 export function createDashboardEventStream(
   options: DashboardEventStreamOptions,
 ): DashboardEventStream {
+  const ticketBaseUrl = options.ticketBaseUrl ?? "/api";
+  const streamBaseUrl = options.streamBaseUrl ?? "/api";
   const fetchTicket = options.fetchTicket ?? (async (token: string) => {
-    return fetch("/api/workflows/dashboard-ticket", {
+    return fetch(`${ticketBaseUrl}/workflows/dashboard-ticket`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -88,7 +92,7 @@ export function createDashboardEventStream(
         ? `&Last-Event-ID=${encodeURIComponent(lastEventId)}`
         : "";
       const nextSource = createEventSource(
-        `/api/workflows/events/dashboard?ticket=${encodeURIComponent(ticket)}${lastId}`,
+        `${streamBaseUrl}/workflows/events/dashboard?ticket=${encodeURIComponent(ticket)}${lastId}`,
       );
       source = nextSource;
 

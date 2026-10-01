@@ -53,3 +53,42 @@ test("dashboard stream reconnects with a fresh one-time ticket", async () => {
 
   stream.close();
 });
+
+test("dashboard tickets stay same-origin while the event stream uses Render", async () => {
+  const originalFetch = globalThis.fetch;
+  const requestedTickets: string[] = [];
+  const openedStreams: string[] = [];
+
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    requestedTickets.push(String(input));
+    return {
+      ok: true,
+      json: async () => ({ ticket: "ticket-render" }),
+    } as Response;
+  }) as typeof fetch;
+
+  try {
+    const stream = createDashboardEventStream({
+      getToken: async () => "clerk-token",
+      ticketBaseUrl: "/api",
+      streamBaseUrl: "https://draftly-api.onrender.com/api",
+      createEventSource: (url) => {
+        openedStreams.push(url);
+        return new FakeEventSource();
+      },
+      handlers: {},
+    });
+
+    await stream.connect();
+
+    assert.equal(requestedTickets[0], "/api/workflows/dashboard-ticket");
+    assert.equal(
+      openedStreams[0],
+      "https://draftly-api.onrender.com/api/workflows/events/dashboard?ticket=ticket-render",
+    );
+
+    stream.close();
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
