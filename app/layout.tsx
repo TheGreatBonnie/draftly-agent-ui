@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AppShell } from "@/components/layout";
 import { ThemeProvider } from "@/components/theme";
+import { THEME_SCRIPT } from "@/lib/theme/theme-script";
 import { ClerkProvider } from "@clerk/nextjs";
 export const metadata = {
   title: "Draftly",
@@ -10,7 +11,6 @@ export const metadata = {
     apple: "/draftly-no-bg-logo.svg",
   },
 };
-const themeScript = `(function(){try{var t=localStorage.getItem('draftly-theme')||'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.style.colorScheme=d?'dark':'light'}catch(e){}})()`;
 export default function RootLayout({
   children,
 }: {
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
         <ClerkProvider afterSignOutUrl="/">

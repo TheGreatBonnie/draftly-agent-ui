@@ -81,6 +81,15 @@ The UI now uses a persisted `light | dark | system` theme with an inline pre-hyd
 
 Prefer semantic utilities for new UI (`bg-background`, `bg-surface`, `text-foreground`, `text-foreground-muted`, `border-border`, `bg-brand-soft`, `text-brand`) instead of hard-coded slate/white values. A compatibility bridge in `globals.css` also darkens the existing screenshot-matched Tailwind utilities.
 
+### Onboarding is light-only
+
+Routes under `/onboarding` always render in light mode, regardless of the stored theme or the OS preference. Two mechanisms enforce this, both driven by `ONBOARDING_PATH_PREFIX` in `lib/theme/resolve.ts` so they cannot drift:
+
+- `lib/theme/theme-script.ts` paints `<html>` light before hydration, so there is no dark first frame.
+- `app/(onboarding)/onboarding/layout.tsx` mounts `<ThemeProvider lockTheme="light">`. The lock is resolved inside `applyTheme` (`lib/theme/apply.ts`), not in provider state, because the root provider's `prefers-color-scheme` listener re-applies on every OS change and a late re-application would otherwise undo the lock.
+
+The lock never reads or writes `localStorage["draftly-theme"]`, so choosing dark in the dashboard still applies everywhere except onboarding, and leaving onboarding restores it. Theme resolution and the pre-hydration script are covered by `tests/theme-resolve.test.ts`, `tests/theme-apply.test.ts`, and `tests/theme-script.test.ts`.
+
 ## Responsive route-backed section tabs
 
 The following top-level areas use horizontally scrollable responsive tabs that map to real routes and mock-driven subpages:

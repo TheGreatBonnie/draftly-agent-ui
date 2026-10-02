@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { AuthTokenSetter } from "@/components/dashboard/auth-token-setter";
+import { ThemeProvider } from "@/components/theme";
 import "../../globals.css";
 
 export const metadata: Metadata = { title: "Draftly — Onboarding" };
@@ -14,9 +15,13 @@ export default async function OnboardingLayout({
   return (
     <>
       <AuthTokenSetter />
-      <div className="onboarding-theme min-h-screen bg-[#f4f7fc] font-[family-name:var(--font-jakarta)]">
-        {children}
-      </div>
+      {/* Onboarding is light-only: lock the theme so it ignores both the stored
+          preference and the OS, matching the pre-hydration script. */}
+      <ThemeProvider lockTheme="light">
+        <div className="onboarding-theme min-h-screen bg-[#f4f7fc] font-[family-name:var(--font-jakarta)]">
+          {children}
+        </div>
+      </ThemeProvider>
     </>
   );
 }
